@@ -1,0 +1,7181 @@
+{
+  "custom_quantize_layers": {
+    "/model.23/Add_1_output_0-rs": "float16",
+    "/model.23/Cast_2_output_0-rs": "float16",
+    "/model.23/Concat_1_output_0-rs": "float16",
+    "/model.23/Concat_1_output_0_sw": "float16",
+    "/model.23/Concat_2_output_0-rs": "float16",
+    "/model.23/Concat_3_output_0-rs": "float16",
+    "/model.23/Concat_output_0-rs": "float16",
+    "/model.23/Concat_output_0_rs": "float16",
+    "/model.23/Flatten_output_0_rs": "float16",
+    "/model.23/GatherElements_1_output_0-rs": "float16",
+    "/model.23/GatherElements_output_0-rs": "float16",
+    "/model.23/Mul_2_output_0-rs": "float16",
+    "/model.23/ReduceMax_output_0-rs": "float16",
+    "/model.23/ReduceMax_output_0_rs": "float16",
+    "/model.23/Reshape_1_output_0": "float16",
+    "/model.23/Reshape_2_output_0": "float16",
+    "/model.23/Reshape_4_output_0": "float16",
+    "/model.23/Reshape_5_output_0": "float16",
+    "/model.23/Sigmoid_output_0_rs": "float16",
+    "/model.23/Slice_1_output_0-rs": "float16",
+    "/model.23/Slice_output_0-rs": "float16",
+    "/model.23/Split_output_0-rs": "float16",
+    "/model.23/Split_output_1-rs": "float16",
+    "/model.23/Sub_output_0-rs": "float16",
+    "/model.23/TopK_1_output_0-rs": "float16",
+    "/model.23/TopK_output_0": "float16",
+    "/model.23/Transpose_output_0-rs": "float16",
+    "/model.23/Unsqueeze_1_output_0_rs": "float16",
+    "output0": "float16",
+    "output0-rs": "float16"
+  },
+  "quantize_parameters": {
+    "images": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "float32",
+      "min": [
+        0.0
+      ],
+      "max": [
+        1.0
+      ],
+      "scale": [],
+      "zero_point": [],
+      "ori_min": [
+        0.0
+      ],
+      "ori_max": [
+        1.0
+      ]
+    },
+    "/model.0/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -125.03107452392578
+      ],
+      "max": [
+        127.75540161132812
+      ],
+      "scale": [
+        0.9913195142558977
+      ],
+      "zero_point": [
+        -2
+      ],
+      "ori_min": [
+        -125.03107452392578
+      ],
+      "ori_max": [
+        127.75540161132812
+      ]
+    },
+    "/model.0/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        127.75540161132812
+      ],
+      "scale": [
+        0.5020935929289051
+      ],
+      "zero_point": [
+        -127
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        127.75540161132812
+      ]
+    },
+    "/model.1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -174.6876678466797
+      ],
+      "max": [
+        157.55239868164062
+      ],
+      "scale": [
+        1.3029022216796875
+      ],
+      "zero_point": [
+        6
+      ],
+      "ori_min": [
+        -174.6876678466797
+      ],
+      "ori_max": [
+        157.55239868164062
+      ]
+    },
+    "/model.1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        157.55239868164062
+      ],
+      "scale": [
+        0.6189445618320913
+      ],
+      "zero_point": [
+        -128
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        157.55239868164062
+      ]
+    },
+    "/model.2/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -100.05636596679688
+      ],
+      "max": [
+        32.361759185791016
+      ],
+      "scale": [
+        0.5192867653042662
+      ],
+      "zero_point": [
+        65
+      ],
+      "ori_min": [
+        -100.05636596679688
+      ],
+      "ori_max": [
+        32.361759185791016
+      ]
+    },
+    "/model.2/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        32.361759185791016
+      ],
+      "scale": [
+        0.12800087753464193
+      ],
+      "zero_point": [
+        -126
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        32.361759185791016
+      ]
+    },
+    "/model.2/Split_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        32.361759185791016
+      ],
+      "scale": [
+        0.12800087753464193
+      ],
+      "zero_point": [
+        -126
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        32.361759185791016
+      ]
+    },
+    "/model.2/Split_output_1": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        19.182815551757812
+      ],
+      "scale": [
+        0.07631874563647252
+      ],
+      "zero_point": [
+        -124
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        19.182815551757812
+      ]
+    },
+    "/model.2/m.0/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -9.193975448608398
+      ],
+      "max": [
+        8.701908111572266
+      ],
+      "scale": [
+        0.07017993553012025
+      ],
+      "zero_point": [
+        3
+      ],
+      "ori_min": [
+        -9.193975448608398
+      ],
+      "ori_max": [
+        8.701908111572266
+      ]
+    },
+    "/model.2/m.0/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        8.700461387634277
+      ],
+      "scale": [
+        0.035211474404615514
+      ],
+      "zero_point": [
+        -120
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        8.700461387634277
+      ]
+    },
+    "/model.2/m.0/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -41.06733703613281
+      ],
+      "max": [
+        34.790306091308594
+      ],
+      "scale": [
+        0.2974809534409467
+      ],
+      "zero_point": [
+        10
+      ],
+      "ori_min": [
+        -41.06733703613281
+      ],
+      "ori_max": [
+        34.790306091308594
+      ]
+    },
+    "/model.2/m.0/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        34.790306091308594
+      ],
+      "scale": [
+        0.13752459088961283
+      ],
+      "zero_point": [
+        -126
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        34.790306091308594
+      ]
+    },
+    "/model.2/m.0/Add_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.5569288730621338
+      ],
+      "max": [
+        34.99681854248047
+      ],
+      "scale": [
+        0.13942646045310825
+      ],
+      "zero_point": [
+        -124
+      ],
+      "ori_min": [
+        -0.5569288730621338
+      ],
+      "ori_max": [
+        34.99681854248047
+      ]
+    },
+    "/model.2/Concat_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.5569288730621338
+      ],
+      "max": [
+        34.99681854248047
+      ],
+      "scale": [
+        0.13942646045310825
+      ],
+      "zero_point": [
+        -124
+      ],
+      "ori_min": [
+        -0.5569288730621338
+      ],
+      "ori_max": [
+        34.99681854248047
+      ]
+    },
+    "/model.2/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -24.71543312072754
+      ],
+      "max": [
+        12.248099327087402
+      ],
+      "scale": [
+        0.14495502920711742
+      ],
+      "zero_point": [
+        43
+      ],
+      "ori_min": [
+        -24.71543312072754
+      ],
+      "ori_max": [
+        12.248099327087402
+      ]
+    },
+    "/model.2/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        12.248041152954102
+      ],
+      "scale": [
+        0.04912355191567365
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        12.248041152954102
+      ]
+    },
+    "/model.3/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -9.936307907104492
+      ],
+      "max": [
+        7.918618679046631
+      ],
+      "scale": [
+        0.07001931994569068
+      ],
+      "zero_point": [
+        14
+      ],
+      "ori_min": [
+        -9.936307907104492
+      ],
+      "ori_max": [
+        7.918618679046631
+      ]
+    },
+    "/model.3/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        7.915737628936768
+      ],
+      "scale": [
+        0.032134126331291944
+      ],
+      "zero_point": [
+        -119
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        7.915737628936768
+      ]
+    },
+    "/model.4/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -12.520885467529297
+      ],
+      "max": [
+        5.864801406860352
+      ],
+      "scale": [
+        0.07210073284074373
+      ],
+      "zero_point": [
+        46
+      ],
+      "ori_min": [
+        -12.520885467529297
+      ],
+      "ori_max": [
+        5.864801406860352
+      ]
+    },
+    "/model.4/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        5.848206996917725
+      ],
+      "scale": [
+        0.024026163068472172
+      ],
+      "zero_point": [
+        -116
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        5.848206996917725
+      ]
+    },
+    "/model.4/Split_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        5.848206996917725
+      ],
+      "scale": [
+        0.024026163068472172
+      ],
+      "zero_point": [
+        -116
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        5.848206996917725
+      ]
+    },
+    "/model.4/Split_output_1": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        5.468210220336914
+      ],
+      "scale": [
+        0.022535979630900364
+      ],
+      "zero_point": [
+        -116
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        5.468210220336914
+      ]
+    },
+    "/model.4/m.0/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -5.7219367027282715
+      ],
+      "max": [
+        4.644355297088623
+      ],
+      "scale": [
+        0.04065212548947802
+      ],
+      "zero_point": [
+        13
+      ],
+      "ori_min": [
+        -5.7219367027282715
+      ],
+      "ori_max": [
+        4.644355297088623
+      ]
+    },
+    "/model.4/m.0/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        4.60012149810791
+      ],
+      "scale": [
+        0.019131710131963093
+      ],
+      "zero_point": [
+        -113
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        4.60012149810791
+      ]
+    },
+    "/model.4/m.0/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -10.280670166015625
+      ],
+      "max": [
+        7.0800933837890625
+      ],
+      "scale": [
+        0.06808142568550858
+      ],
+      "zero_point": [
+        23
+      ],
+      "ori_min": [
+        -10.280670166015625
+      ],
+      "ori_max": [
+        7.0800933837890625
+      ]
+    },
+    "/model.4/m.0/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        7.074138641357422
+      ],
+      "scale": [
+        0.028833738144706276
+      ],
+      "zero_point": [
+        -118
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        7.074138641357422
+      ]
+    },
+    "/model.4/m.0/Add_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.5569291114807129
+      ],
+      "max": [
+        8.10047435760498
+      ],
+      "scale": [
+        0.03395060183955174
+      ],
+      "zero_point": [
+        -112
+      ],
+      "ori_min": [
+        -0.5569291114807129
+      ],
+      "ori_max": [
+        8.10047435760498
+      ]
+    },
+    "/model.4/Concat_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.5569291114807129
+      ],
+      "max": [
+        8.10047435760498
+      ],
+      "scale": [
+        0.03395060183955174
+      ],
+      "zero_point": [
+        -112
+      ],
+      "ori_min": [
+        -0.5569291114807129
+      ],
+      "ori_max": [
+        8.10047435760498
+      ]
+    },
+    "/model.4/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -11.136608123779297
+      ],
+      "max": [
+        7.088951587677002
+      ],
+      "scale": [
+        0.07147278318218156
+      ],
+      "zero_point": [
+        28
+      ],
+      "ori_min": [
+        -11.136608123779297
+      ],
+      "ori_max": [
+        7.088951587677002
+      ]
+    },
+    "/model.4/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        7.083043098449707
+      ],
+      "scale": [
+        0.028868657584283867
+      ],
+      "zero_point": [
+        -118
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        7.083043098449707
+      ]
+    },
+    "/model.4/cv2/act/Mul_output_0_conv": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -7.446998596191406
+      ],
+      "max": [
+        3.5302748680114746
+      ],
+      "scale": [
+        0.04304813123216816
+      ],
+      "zero_point": [
+        45
+      ],
+      "ori_min": [
+        -7.446998596191406
+      ],
+      "ori_max": [
+        3.5302748680114746
+      ]
+    },
+    "/model.5/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -9.996805191040039
+      ],
+      "max": [
+        10.077903747558594
+      ],
+      "scale": [
+        0.07872434877881816
+      ],
+      "zero_point": [
+        -1
+      ],
+      "ori_min": [
+        -9.996805191040039
+      ],
+      "ori_max": [
+        10.077903747558594
+      ]
+    },
+    "/model.5/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        10.077481269836426
+      ],
+      "scale": [
+        0.04061155237403571
+      ],
+      "zero_point": [
+        -121
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        10.077481269836426
+      ]
+    },
+    "/model.6/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -11.48250961303711
+      ],
+      "max": [
+        8.818418502807617
+      ],
+      "scale": [
+        0.07961148280723422
+      ],
+      "zero_point": [
+        16
+      ],
+      "ori_min": [
+        -11.48250961303711
+      ],
+      "ori_max": [
+        8.818418502807617
+      ]
+    },
+    "/model.6/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        8.817113876342773
+      ],
+      "scale": [
+        0.03566893514464883
+      ],
+      "zero_point": [
+        -120
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        8.817113876342773
+      ]
+    },
+    "/model.6/Split_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        7.656523704528809
+      ],
+      "scale": [
+        0.031117601137535245
+      ],
+      "zero_point": [
+        -119
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        7.656523704528809
+      ]
+    },
+    "/model.6/Split_output_1": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        8.817113876342773
+      ],
+      "scale": [
+        0.03566893514464883
+      ],
+      "zero_point": [
+        -120
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        8.817113876342773
+      ]
+    },
+    "/model.6/m.0/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -7.46444034576416
+      ],
+      "max": [
+        4.291190147399902
+      ],
+      "scale": [
+        0.04610051173789828
+      ],
+      "zero_point": [
+        34
+      ],
+      "ori_min": [
+        -7.46444034576416
+      ],
+      "ori_max": [
+        4.291190147399902
+      ]
+    },
+    "/model.6/m.0/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846455574035645
+      ],
+      "max": [
+        4.233242988586426
+      ],
+      "scale": [
+        0.017692970762065812
+      ],
+      "zero_point": [
+        -112
+      ],
+      "ori_min": [
+        -0.27846455574035645
+      ],
+      "ori_max": [
+        4.233242988586426
+      ]
+    },
+    "/model.6/m.0/m/m.0/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -8.98420238494873
+      ],
+      "max": [
+        7.650257110595703
+      ],
+      "scale": [
+        0.06523317449233111
+      ],
+      "zero_point": [
+        10
+      ],
+      "ori_min": [
+        -8.98420238494873
+      ],
+      "ori_max": [
+        7.650257110595703
+      ]
+    },
+    "/model.6/m.0/m/m.0/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        7.646618366241455
+      ],
+      "scale": [
+        0.03107875667366327
+      ],
+      "zero_point": [
+        -119
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        7.646618366241455
+      ]
+    },
+    "/model.6/m.0/m/m.0/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -7.065734386444092
+      ],
+      "max": [
+        6.441337585449219
+      ],
+      "scale": [
+        0.05296890969369926
+      ],
+      "zero_point": [
+        5
+      ],
+      "ori_min": [
+        -7.065734386444092
+      ],
+      "ori_max": [
+        6.441337585449219
+      ]
+    },
+    "/model.6/m.0/m/m.0/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        6.431084632873535
+      ],
+      "scale": [
+        0.026311957719279272
+      ],
+      "zero_point": [
+        -117
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        6.431084632873535
+      ]
+    },
+    "/model.6/m.0/m/m.0/Add_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.5569288730621338
+      ],
+      "max": [
+        6.202641487121582
+      ],
+      "scale": [
+        0.026508119059543984
+      ],
+      "zero_point": [
+        -107
+      ],
+      "ori_min": [
+        -0.5569288730621338
+      ],
+      "ori_max": [
+        6.202641487121582
+      ]
+    },
+    "/model.6/m.0/m/m.1/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -8.440770149230957
+      ],
+      "max": [
+        8.499861717224121
+      ],
+      "scale": [
+        0.06643385045668658
+      ],
+      "zero_point": [
+        -1
+      ],
+      "ori_min": [
+        -8.440770149230957
+      ],
+      "ori_max": [
+        8.499861717224121
+      ]
+    },
+    "/model.6/m.0/m/m.1/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        8.498132705688477
+      ],
+      "scale": [
+        0.03441802859306335
+      ],
+      "zero_point": [
+        -120
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        8.498132705688477
+      ]
+    },
+    "/model.6/m.0/m/m.1/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -13.96444034576416
+      ],
+      "max": [
+        11.614548683166504
+      ],
+      "scale": [
+        0.10030976089776732
+      ],
+      "zero_point": [
+        11
+      ],
+      "ori_min": [
+        -13.96444034576416
+      ],
+      "ori_max": [
+        11.614548683166504
+      ]
+    },
+    "/model.6/m.0/m/m.1/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        11.6144437789917
+      ],
+      "scale": [
+        0.04663885633150736
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        11.6144437789917
+      ]
+    },
+    "/model.6/m.0/m/m.1/Add_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.8353026509284973
+      ],
+      "max": [
+        13.031213760375977
+      ],
+      "scale": [
+        0.05437849573060578
+      ],
+      "zero_point": [
+        -113
+      ],
+      "ori_min": [
+        -0.8353026509284973
+      ],
+      "ori_max": [
+        13.031213760375977
+      ]
+    },
+    "/model.6/m.0/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -11.309633255004883
+      ],
+      "max": [
+        10.840350151062012
+      ],
+      "scale": [
+        0.08686268002379174
+      ],
+      "zero_point": [
+        2
+      ],
+      "ori_min": [
+        -11.309633255004883
+      ],
+      "ori_max": [
+        10.840350151062012
+      ]
+    },
+    "/model.6/m.0/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        10.84013843536377
+      ],
+      "scale": [
+        0.04360236478786843
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        10.84013843536377
+      ]
+    },
+    "/model.6/m.0/Concat_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.8353026509284973
+      ],
+      "max": [
+        13.031213760375977
+      ],
+      "scale": [
+        0.05437849573060578
+      ],
+      "zero_point": [
+        -113
+      ],
+      "ori_min": [
+        -0.8353026509284973
+      ],
+      "ori_max": [
+        13.031213760375977
+      ]
+    },
+    "/model.6/m.0/cv3/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -11.574831008911133
+      ],
+      "max": [
+        9.899105072021484
+      ],
+      "scale": [
+        0.08421151404287301
+      ],
+      "zero_point": [
+        9
+      ],
+      "ori_min": [
+        -11.574831008911133
+      ],
+      "ori_max": [
+        9.899105072021484
+      ]
+    },
+    "/model.6/m.0/cv3/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        9.898608207702637
+      ],
+      "scale": [
+        0.039910089385275745
+      ],
+      "zero_point": [
+        -121
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        9.898608207702637
+      ]
+    },
+    "/model.6/Concat_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        9.898608207702637
+      ],
+      "scale": [
+        0.039910089385275745
+      ],
+      "zero_point": [
+        -121
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        9.898608207702637
+      ]
+    },
+    "/model.6/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -7.674101829528809
+      ],
+      "max": [
+        7.6353230476379395
+      ],
+      "scale": [
+        0.0600369603026147
+      ],
+      "zero_point": [
+        0
+      ],
+      "ori_min": [
+        -7.674101829528809
+      ],
+      "ori_max": [
+        7.6353230476379395
+      ]
+    },
+    "/model.6/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        7.631636619567871
+      ],
+      "scale": [
+        0.031020004725923724
+      ],
+      "zero_point": [
+        -119
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        7.631636619567871
+      ]
+    },
+    "/model.6/cv2/act/Mul_output_0_conv": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -8.458944320678711
+      ],
+      "max": [
+        4.873873233795166
+      ],
+      "scale": [
+        0.05228555903715246
+      ],
+      "zero_point": [
+        34
+      ],
+      "ori_min": [
+        -8.458944320678711
+      ],
+      "ori_max": [
+        4.873873233795166
+      ]
+    },
+    "/model.7/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -14.057206153869629
+      ],
+      "max": [
+        11.081295013427734
+      ],
+      "scale": [
+        0.0985823575188132
+      ],
+      "zero_point": [
+        15
+      ],
+      "ori_min": [
+        -14.057206153869629
+      ],
+      "ori_max": [
+        11.081295013427734
+      ]
+    },
+    "/model.7/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        11.081124305725098
+      ],
+      "scale": [
+        0.04454740741673638
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        11.081124305725098
+      ]
+    },
+    "/model.8/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -11.459029197692871
+      ],
+      "max": [
+        15.718189239501953
+      ],
+      "scale": [
+        0.10657732720468559
+      ],
+      "zero_point": [
+        -20
+      ],
+      "ori_min": [
+        -11.459029197692871
+      ],
+      "ori_max": [
+        15.718189239501953
+      ]
+    },
+    "/model.8/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        15.71818733215332
+      ],
+      "scale": [
+        0.06273196830469019
+      ],
+      "zero_point": [
+        -124
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        15.71818733215332
+      ]
+    },
+    "/model.8/Split_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        11.858231544494629
+      ],
+      "scale": [
+        0.04759488678446003
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        11.858231544494629
+      ]
+    },
+    "/model.8/Split_output_1": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        15.71818733215332
+      ],
+      "scale": [
+        0.06273196830469019
+      ],
+      "zero_point": [
+        -124
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        15.71818733215332
+      ]
+    },
+    "/model.8/m.0/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -6.947704315185547
+      ],
+      "max": [
+        6.343620777130127
+      ],
+      "scale": [
+        0.05212284349927715
+      ],
+      "zero_point": [
+        5
+      ],
+      "ori_min": [
+        -6.947704315185547
+      ],
+      "ori_max": [
+        6.343620777130127
+      ]
+    },
+    "/model.8/m.0/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        6.332488536834717
+      ],
+      "scale": [
+        0.025925306362264297
+      ],
+      "zero_point": [
+        -117
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        6.332488536834717
+      ]
+    },
+    "/model.8/m.0/m/m.0/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -11.201026916503906
+      ],
+      "max": [
+        14.249079704284668
+      ],
+      "scale": [
+        0.09980433968936696
+      ],
+      "zero_point": [
+        -16
+      ],
+      "ori_min": [
+        -11.201026916503906
+      ],
+      "ori_max": [
+        14.249079704284668
+      ]
+    },
+    "/model.8/m.0/m/m.0/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        14.24907112121582
+      ],
+      "scale": [
+        0.05697072826179803
+      ],
+      "zero_point": [
+        -123
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        14.24907112121582
+      ]
+    },
+    "/model.8/m.0/m/m.0/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -11.197893142700195
+      ],
+      "max": [
+        12.56398868560791
+      ],
+      "scale": [
+        0.09318385030709062
+      ],
+      "zero_point": [
+        -8
+      ],
+      "ori_min": [
+        -11.197893142700195
+      ],
+      "ori_max": [
+        12.56398868560791
+      ]
+    },
+    "/model.8/m.0/m/m.0/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        12.563944816589355
+      ],
+      "scale": [
+        0.050362389812282485
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        12.563944816589355
+      ]
+    },
+    "/model.8/m.0/m/m.0/Add_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.5569291114807129
+      ],
+      "max": [
+        12.702564239501953
+      ],
+      "scale": [
+        0.051998013141108496
+      ],
+      "zero_point": [
+        -117
+      ],
+      "ori_min": [
+        -0.5569291114807129
+      ],
+      "ori_max": [
+        12.702564239501953
+      ]
+    },
+    "/model.8/m.0/m/m.1/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -10.779869079589844
+      ],
+      "max": [
+        11.92631721496582
+      ],
+      "scale": [
+        0.08904386782178692
+      ],
+      "zero_point": [
+        -7
+      ],
+      "ori_min": [
+        -10.779869079589844
+      ],
+      "ori_max": [
+        11.92631721496582
+      ]
+    },
+    "/model.8/m.0/m/m.1/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        11.926239013671875
+      ],
+      "scale": [
+        0.04786158274201786
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        11.926239013671875
+      ]
+    },
+    "/model.8/m.0/m/m.1/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -20.114395141601562
+      ],
+      "max": [
+        17.49260711669922
+      ],
+      "scale": [
+        0.14747844022863052
+      ],
+      "zero_point": [
+        8
+      ],
+      "ori_min": [
+        -20.114395141601562
+      ],
+      "ori_max": [
+        17.49260711669922
+      ]
+    },
+    "/model.8/m.0/m/m.1/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846455574035645
+      ],
+      "max": [
+        17.49260711669922
+      ],
+      "scale": [
+        0.06969047714682186
+      ],
+      "zero_point": [
+        -124
+      ],
+      "ori_min": [
+        -0.27846455574035645
+      ],
+      "ori_max": [
+        17.49260711669922
+      ]
+    },
+    "/model.8/m.0/m/m.1/Add_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.8353886604309082
+      ],
+      "max": [
+        24.226749420166016
+      ],
+      "scale": [
+        0.09828289443371342
+      ],
+      "zero_point": [
+        -120
+      ],
+      "ori_min": [
+        -0.8353886604309082
+      ],
+      "ori_max": [
+        24.226749420166016
+      ]
+    },
+    "/model.8/m.0/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -10.612882614135742
+      ],
+      "max": [
+        20.24820327758789
+      ],
+      "scale": [
+        0.12102386624205347
+      ],
+      "zero_point": [
+        -40
+      ],
+      "ori_min": [
+        -10.612882614135742
+      ],
+      "ori_max": [
+        20.24820327758789
+      ]
+    },
+    "/model.8/m.0/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        20.24820327758789
+      ],
+      "scale": [
+        0.0804967367181591
+      ],
+      "zero_point": [
+        -125
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        20.24820327758789
+      ]
+    },
+    "/model.8/m.0/Concat_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.8353886604309082
+      ],
+      "max": [
+        24.226749420166016
+      ],
+      "scale": [
+        0.09828289443371342
+      ],
+      "zero_point": [
+        -120
+      ],
+      "ori_min": [
+        -0.8353886604309082
+      ],
+      "ori_max": [
+        24.226749420166016
+      ]
+    },
+    "/model.8/m.0/cv3/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -11.086748123168945
+      ],
+      "max": [
+        12.560739517211914
+      ],
+      "scale": [
+        0.09273524564855239
+      ],
+      "zero_point": [
+        -8
+      ],
+      "ori_min": [
+        -11.086748123168945
+      ],
+      "ori_max": [
+        12.560739517211914
+      ]
+    },
+    "/model.8/m.0/cv3/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        12.56069564819336
+      ],
+      "scale": [
+        0.050349647975435445
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        12.56069564819336
+      ]
+    },
+    "/model.8/Concat_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        15.71818733215332
+      ],
+      "scale": [
+        0.06273196830469019
+      ],
+      "zero_point": [
+        -124
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        15.71818733215332
+      ]
+    },
+    "/model.8/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -11.754977226257324
+      ],
+      "max": [
+        9.156524658203125
+      ],
+      "scale": [
+        0.08200588974298216
+      ],
+      "zero_point": [
+        15
+      ],
+      "ori_min": [
+        -11.754977226257324
+      ],
+      "ori_max": [
+        9.156524658203125
+      ]
+    },
+    "/model.8/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        9.155558586120605
+      ],
+      "scale": [
+        0.03699616930064033
+      ],
+      "zero_point": [
+        -120
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        9.155558586120605
+      ]
+    },
+    "/model.9/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -15.780731201171875
+      ],
+      "max": [
+        7.8289337158203125
+      ],
+      "scale": [
+        0.09258692124310662
+      ],
+      "zero_point": [
+        42
+      ],
+      "ori_min": [
+        -15.780731201171875
+      ],
+      "ori_max": [
+        7.8289337158203125
+      ]
+    },
+    "/model.9/m/MaxPool_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -15.780731201171875
+      ],
+      "max": [
+        7.8289337158203125
+      ],
+      "scale": [
+        0.09258692124310662
+      ],
+      "zero_point": [
+        42
+      ],
+      "ori_min": [
+        -3.2274794578552246
+      ],
+      "ori_max": [
+        7.8289337158203125
+      ]
+    },
+    "/model.9/m_1/MaxPool_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -15.780731201171875
+      ],
+      "max": [
+        7.8289337158203125
+      ],
+      "scale": [
+        0.09258692124310662
+      ],
+      "zero_point": [
+        42
+      ],
+      "ori_min": [
+        -2.548478126525879
+      ],
+      "ori_max": [
+        7.8289337158203125
+      ]
+    },
+    "/model.9/m_2/MaxPool_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -15.780731201171875
+      ],
+      "max": [
+        7.8289337158203125
+      ],
+      "scale": [
+        0.09258692124310662
+      ],
+      "zero_point": [
+        42
+      ],
+      "ori_min": [
+        -1.82173490524292
+      ],
+      "ori_max": [
+        7.8289337158203125
+      ]
+    },
+    "/model.9/Concat_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -15.780731201171875
+      ],
+      "max": [
+        7.8289337158203125
+      ],
+      "scale": [
+        0.09258692124310662
+      ],
+      "zero_point": [
+        42
+      ],
+      "ori_min": [
+        -15.780731201171875
+      ],
+      "ori_max": [
+        7.8289337158203125
+      ]
+    },
+    "/model.9/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -12.67227554321289
+      ],
+      "max": [
+        10.947105407714844
+      ],
+      "scale": [
+        0.09262502333697151
+      ],
+      "zero_point": [
+        9
+      ],
+      "ori_min": [
+        -12.67227554321289
+      ],
+      "ori_max": [
+        10.947105407714844
+      ]
+    },
+    "/model.9/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        10.946911811828613
+      ],
+      "scale": [
+        0.044021083911259966
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        10.946911811828613
+      ]
+    },
+    "/model.9/Add_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.5569291114807129
+      ],
+      "max": [
+        17.922542572021484
+      ],
+      "scale": [
+        0.07246851640589097
+      ],
+      "zero_point": [
+        -120
+      ],
+      "ori_min": [
+        -0.5569291114807129
+      ],
+      "ori_max": [
+        17.922542572021484
+      ]
+    },
+    "/model.10/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -11.353445053100586
+      ],
+      "max": [
+        13.531087875366211
+      ],
+      "scale": [
+        0.09758640364104626
+      ],
+      "zero_point": [
+        -12
+      ],
+      "ori_min": [
+        -11.353445053100586
+      ],
+      "ori_max": [
+        13.531087875366211
+      ]
+    },
+    "/model.10/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        13.5310697555542
+      ],
+      "scale": [
+        0.05415503663175246
+      ],
+      "zero_point": [
+        -123
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        13.5310697555542
+      ]
+    },
+    "/model.10/Split_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        13.5310697555542
+      ],
+      "scale": [
+        0.05415503663175246
+      ],
+      "zero_point": [
+        -123
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        13.5310697555542
+      ]
+    },
+    "/model.10/Split_output_1": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        12.55017375946045
+      ],
+      "scale": [
+        0.05030838566667893
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        12.55017375946045
+      ]
+    },
+    "/model.10/m/m.0/attn/qkv/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -14.93155574798584
+      ],
+      "max": [
+        13.078237533569336
+      ],
+      "scale": [
+        0.10984232659433402
+      ],
+      "zero_point": [
+        8
+      ],
+      "ori_min": [
+        -14.93155574798584
+      ],
+      "ori_max": [
+        13.078237533569336
+      ]
+    },
+    "/model.10/m/m.0/attn/Reshape_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -14.93155574798584
+      ],
+      "max": [
+        13.078237533569336
+      ],
+      "scale": [
+        0.10984232659433402
+      ],
+      "zero_point": [
+        8
+      ],
+      "ori_min": [
+        -14.93155574798584
+      ],
+      "ori_max": [
+        13.078237533569336
+      ]
+    },
+    "/model.10/m/m.0/attn/Split_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -6.4473676681518555
+      ],
+      "max": [
+        7.21372127532959
+      ],
+      "scale": [
+        0.053572897817574294
+      ],
+      "zero_point": [
+        -8
+      ],
+      "ori_min": [
+        -6.4473676681518555
+      ],
+      "ori_max": [
+        7.21372127532959
+      ]
+    },
+    "/model.10/m/m.0/attn/Split_output_1": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -10.992328643798828
+      ],
+      "max": [
+        9.757076263427734
+      ],
+      "scale": [
+        0.08137021532245711
+      ],
+      "zero_point": [
+        7
+      ],
+      "ori_min": [
+        -10.992328643798828
+      ],
+      "ori_max": [
+        9.757076263427734
+      ]
+    },
+    "/model.10/m/m.0/attn/Split_output_2": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -14.93155574798584
+      ],
+      "max": [
+        13.078237533569336
+      ],
+      "scale": [
+        0.10984232659433402
+      ],
+      "zero_point": [
+        8
+      ],
+      "ori_min": [
+        -14.93155574798584
+      ],
+      "ori_max": [
+        13.078237533569336
+      ]
+    },
+    "/model.10/m/m.0/attn/MatMul_1_output_0_mm": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -8.479548454284668
+      ],
+      "max": [
+        8.646366119384766
+      ],
+      "scale": [
+        0.06716044930850758
+      ],
+      "zero_point": [
+        -2
+      ],
+      "ori_min": [
+        -8.479548454284668
+      ],
+      "ori_max": [
+        8.646366119384766
+      ]
+    },
+    "/model.10/m/m.0/attn/MatMul_1#1_2sdpa_q_matmul": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -110.74227142333984
+      ],
+      "max": [
+        135.12588500976562
+      ],
+      "scale": [
+        0.9641888487572764
+      ],
+      "zero_point": [
+        -13
+      ],
+      "ori_min": [
+        -110.74227142333984
+      ],
+      "ori_max": [
+        135.12588500976562
+      ]
+    },
+    "/model.10/m/m.0/attn/MatMul_1#1_2sdpa_q_softmax": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        0.0
+      ],
+      "max": [
+        0.9887152314186096
+      ],
+      "scale": [
+        0.003877314633014155
+      ],
+      "zero_point": [
+        -128
+      ],
+      "ori_min": [
+        1.999509366729013e-18
+      ],
+      "ori_max": [
+        0.9887152314186096
+      ]
+    },
+    "/model.10/m/m.0/attn/Reshape_1_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -8.479548454284668
+      ],
+      "max": [
+        8.646366119384766
+      ],
+      "scale": [
+        0.06716044930850758
+      ],
+      "zero_point": [
+        -2
+      ],
+      "ori_min": [
+        -8.479548454284668
+      ],
+      "ori_max": [
+        8.646366119384766
+      ]
+    },
+    "/model.10/m/m.0/attn/Reshape_2_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -14.93155574798584
+      ],
+      "max": [
+        13.078237533569336
+      ],
+      "scale": [
+        0.10984232659433402
+      ],
+      "zero_point": [
+        8
+      ],
+      "ori_min": [
+        -14.93155574798584
+      ],
+      "ori_max": [
+        13.078237533569336
+      ]
+    },
+    "/model.10/m/m.0/attn/pe/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -6.584305286407471
+      ],
+      "max": [
+        8.047194480895996
+      ],
+      "scale": [
+        0.0573784304600136
+      ],
+      "zero_point": [
+        -13
+      ],
+      "ori_min": [
+        -6.584305286407471
+      ],
+      "ori_max": [
+        8.047194480895996
+      ]
+    },
+    "/model.10/m/m.0/attn/Add_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -6.609009742736816
+      ],
+      "max": [
+        5.8328166007995605
+      ],
+      "scale": [
+        0.0487914758570054
+      ],
+      "zero_point": [
+        7
+      ],
+      "ori_min": [
+        -6.609009742736816
+      ],
+      "ori_max": [
+        5.8328166007995605
+      ]
+    },
+    "/model.10/m/m.0/attn/proj/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -7.949949264526367
+      ],
+      "max": [
+        9.638725280761719
+      ],
+      "scale": [
+        0.0689751942952474
+      ],
+      "zero_point": [
+        -13
+      ],
+      "ori_min": [
+        -7.949949264526367
+      ],
+      "ori_max": [
+        9.638725280761719
+      ]
+    },
+    "/model.10/m/m.0/Add_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -5.055085182189941
+      ],
+      "max": [
+        13.803789138793945
+      ],
+      "scale": [
+        0.07395636988621132
+      ],
+      "zero_point": [
+        -60
+      ],
+      "ori_min": [
+        -5.055085182189941
+      ],
+      "ori_max": [
+        13.803789138793945
+      ]
+    },
+    "/model.10/m/m.0/ffn/ffn.0/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -14.646183013916016
+      ],
+      "max": [
+        6.834939956665039
+      ],
+      "scale": [
+        0.08423969792384728
+      ],
+      "zero_point": [
+        46
+      ],
+      "ori_min": [
+        -14.646183013916016
+      ],
+      "ori_max": [
+        6.834939956665039
+      ]
+    },
+    "/model.10/m/m.0/ffn/ffn.0/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        6.827596664428711
+      ],
+      "scale": [
+        0.0278669068626329
+      ],
+      "zero_point": [
+        -118
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        6.827596664428711
+      ]
+    },
+    "/model.10/m/m.0/ffn/ffn.1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -10.127918243408203
+      ],
+      "max": [
+        8.182121276855469
+      ],
+      "scale": [
+        0.07180407655005362
+      ],
+      "zero_point": [
+        13
+      ],
+      "ori_min": [
+        -10.127918243408203
+      ],
+      "ori_max": [
+        8.182121276855469
+      ]
+    },
+    "/model.10/m/m.0/Add_1_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -8.570730209350586
+      ],
+      "max": [
+        13.578442573547363
+      ],
+      "scale": [
+        0.08685950110940373
+      ],
+      "zero_point": [
+        -29
+      ],
+      "ori_min": [
+        -8.570730209350586
+      ],
+      "ori_max": [
+        13.578442573547363
+      ]
+    },
+    "/model.10/Concat_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -8.570730209350586
+      ],
+      "max": [
+        13.578442573547363
+      ],
+      "scale": [
+        0.08685950110940373
+      ],
+      "zero_point": [
+        -29
+      ],
+      "ori_min": [
+        -8.570730209350586
+      ],
+      "ori_max": [
+        13.578442573547363
+      ]
+    },
+    "/model.10/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -13.367477416992188
+      ],
+      "max": [
+        12.277812004089355
+      ],
+      "scale": [
+        0.1005697624356139
+      ],
+      "zero_point": [
+        5
+      ],
+      "ori_min": [
+        -13.367477416992188
+      ],
+      "ori_max": [
+        12.277812004089355
+      ]
+    },
+    "/model.10/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        12.277754783630371
+      ],
+      "scale": [
+        0.049240075957541374
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        12.277754783630371
+      ]
+    },
+    "/model.11/Resize_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        12.277754783630371
+      ],
+      "scale": [
+        0.049240075957541374
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        12.277754783630371
+      ]
+    },
+    "/model.11/Resize_output_0_conv": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -10.359716415405273
+      ],
+      "max": [
+        9.237405776977539
+      ],
+      "scale": [
+        0.07685145957797182
+      ],
+      "zero_point": [
+        7
+      ],
+      "ori_min": [
+        -10.359716415405273
+      ],
+      "ori_max": [
+        9.237405776977539
+      ]
+    },
+    "/model.13/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -13.356053352355957
+      ],
+      "max": [
+        6.966891288757324
+      ],
+      "scale": [
+        0.07969782212201287
+      ],
+      "zero_point": [
+        40
+      ],
+      "ori_min": [
+        -13.356053352355957
+      ],
+      "ori_max": [
+        6.966891288757324
+      ]
+    },
+    "/model.13/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        6.960330486297607
+      ],
+      "scale": [
+        0.02838743165427563
+      ],
+      "zero_point": [
+        -118
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        6.960330486297607
+      ]
+    },
+    "/model.13/Split_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        6.960330486297607
+      ],
+      "scale": [
+        0.02838743165427563
+      ],
+      "zero_point": [
+        -118
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        6.960330486297607
+      ]
+    },
+    "/model.13/Split_output_1": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        6.519979000091553
+      ],
+      "scale": [
+        0.026660563080918555
+      ],
+      "zero_point": [
+        -118
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        6.519979000091553
+      ]
+    },
+    "/model.13/m.0/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -10.055180549621582
+      ],
+      "max": [
+        6.0995659828186035
+      ],
+      "scale": [
+        0.06335194718603994
+      ],
+      "zero_point": [
+        31
+      ],
+      "ori_min": [
+        -10.055180549621582
+      ],
+      "ori_max": [
+        6.0995659828186035
+      ]
+    },
+    "/model.13/m.0/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        6.085909843444824
+      ],
+      "scale": [
+        0.02495833109406864
+      ],
+      "zero_point": [
+        -117
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        6.085909843444824
+      ]
+    },
+    "/model.13/m.0/m/m.0/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -12.415136337280273
+      ],
+      "max": [
+        9.574012756347656
+      ],
+      "scale": [
+        0.08623195722991345
+      ],
+      "zero_point": [
+        16
+      ],
+      "ori_min": [
+        -12.415136337280273
+      ],
+      "ori_max": [
+        9.574012756347656
+      ]
+    },
+    "/model.13/m.0/m/m.0/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        9.573347091674805
+      ],
+      "scale": [
+        0.03863455559693131
+      ],
+      "zero_point": [
+        -121
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        9.573347091674805
+      ]
+    },
+    "/model.13/m.0/m/m.0/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -12.967052459716797
+      ],
+      "max": [
+        10.550326347351074
+      ],
+      "scale": [
+        0.09222501492967793
+      ],
+      "zero_point": [
+        13
+      ],
+      "ori_min": [
+        -12.967052459716797
+      ],
+      "ori_max": [
+        10.550326347351074
+      ]
+    },
+    "/model.13/m.0/m/m.0/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        10.550049781799316
+      ],
+      "scale": [
+        0.04246476222487057
+      ],
+      "zero_point": [
+        -121
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        10.550049781799316
+      ]
+    },
+    "/model.13/m.0/m/m.0/Add_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.5569289922714233
+      ],
+      "max": [
+        10.46102523803711
+      ],
+      "scale": [
+        0.04320766364826876
+      ],
+      "zero_point": [
+        -115
+      ],
+      "ori_min": [
+        -0.5569289922714233
+      ],
+      "ori_max": [
+        10.46102523803711
+      ]
+    },
+    "/model.13/m.0/m/m.1/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -10.471762657165527
+      ],
+      "max": [
+        9.283269882202148
+      ],
+      "scale": [
+        0.07747071584065755
+      ],
+      "zero_point": [
+        7
+      ],
+      "ori_min": [
+        -10.471762657165527
+      ],
+      "ori_max": [
+        9.283269882202148
+      ]
+    },
+    "/model.13/m.0/m/m.1/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        9.2824068069458
+      ],
+      "scale": [
+        0.03749361330387639
+      ],
+      "zero_point": [
+        -121
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        9.2824068069458
+      ]
+    },
+    "/model.13/m.0/m/m.1/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -18.3886661529541
+      ],
+      "max": [
+        15.704594612121582
+      ],
+      "scale": [
+        0.1336990618238262
+      ],
+      "zero_point": [
+        10
+      ],
+      "ori_min": [
+        -18.3886661529541
+      ],
+      "ori_max": [
+        15.704594612121582
+      ]
+    },
+    "/model.13/m.0/m/m.1/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846455574035645
+      ],
+      "max": [
+        15.70459270477295
+      ],
+      "scale": [
+        0.06267865592358159
+      ],
+      "zero_point": [
+        -124
+      ],
+      "ori_min": [
+        -0.27846455574035645
+      ],
+      "ori_max": [
+        15.70459270477295
+      ]
+    },
+    "/model.13/m.0/m/m.1/Add_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.8353441953659058
+      ],
+      "max": [
+        15.895697593688965
+      ],
+      "scale": [
+        0.0656119285845289
+      ],
+      "zero_point": [
+        -115
+      ],
+      "ori_min": [
+        -0.8353441953659058
+      ],
+      "ori_max": [
+        15.895697593688965
+      ]
+    },
+    "/model.13/m.0/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -16.7370548248291
+      ],
+      "max": [
+        14.236682891845703
+      ],
+      "scale": [
+        0.12146563810460707
+      ],
+      "zero_point": [
+        10
+      ],
+      "ori_min": [
+        -16.7370548248291
+      ],
+      "ori_max": [
+        14.236682891845703
+      ]
+    },
+    "/model.13/m.0/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        14.236672401428223
+      ],
+      "scale": [
+        0.05692210583125844
+      ],
+      "zero_point": [
+        -123
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        14.236672401428223
+      ]
+    },
+    "/model.13/m.0/Concat_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.8353441953659058
+      ],
+      "max": [
+        15.895697593688965
+      ],
+      "scale": [
+        0.0656119285845289
+      ],
+      "zero_point": [
+        -115
+      ],
+      "ori_min": [
+        -0.8353441953659058
+      ],
+      "ori_max": [
+        15.895697593688965
+      ]
+    },
+    "/model.13/m.0/cv3/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -10.469462394714355
+      ],
+      "max": [
+        10.618106842041016
+      ],
+      "scale": [
+        0.08269634994806029
+      ],
+      "zero_point": [
+        -1
+      ],
+      "ori_min": [
+        -10.469462394714355
+      ],
+      "ori_max": [
+        10.618106842041016
+      ]
+    },
+    "/model.13/m.0/cv3/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        10.617847442626953
+      ],
+      "scale": [
+        0.04273063540458679
+      ],
+      "zero_point": [
+        -121
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        10.617847442626953
+      ]
+    },
+    "/model.13/Concat_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        10.617847442626953
+      ],
+      "scale": [
+        0.04273063540458679
+      ],
+      "zero_point": [
+        -121
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        10.617847442626953
+      ]
+    },
+    "/model.13/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -9.849627494812012
+      ],
+      "max": [
+        5.96340799331665
+      ],
+      "scale": [
+        0.06201190387501436
+      ],
+      "zero_point": [
+        31
+      ],
+      "ori_min": [
+        -9.849627494812012
+      ],
+      "ori_max": [
+        5.96340799331665
+      ]
+    },
+    "/model.13/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        5.94811487197876
+      ],
+      "scale": [
+        0.024417958656946816
+      ],
+      "zero_point": [
+        -117
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        5.94811487197876
+      ]
+    },
+    "/model.14/Resize_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        5.94811487197876
+      ],
+      "scale": [
+        0.024417958656946816
+      ],
+      "zero_point": [
+        -117
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        5.94811487197876
+      ]
+    },
+    "/model.14/Resize_output_0_conv": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -3.390613555908203
+      ],
+      "max": [
+        3.568397045135498
+      ],
+      "scale": [
+        0.02729023765115177
+      ],
+      "zero_point": [
+        -4
+      ],
+      "ori_min": [
+        -3.390613555908203
+      ],
+      "ori_max": [
+        3.568397045135498
+      ]
+    },
+    "/model.16/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -7.758781909942627
+      ],
+      "max": [
+        4.330369472503662
+      ],
+      "scale": [
+        0.047408436793907015
+      ],
+      "zero_point": [
+        36
+      ],
+      "ori_min": [
+        -7.758781909942627
+      ],
+      "ori_max": [
+        4.330369472503662
+      ]
+    },
+    "/model.16/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        4.274110317230225
+      ],
+      "scale": [
+        0.017853234912834914
+      ],
+      "zero_point": [
+        -112
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        4.274110317230225
+      ]
+    },
+    "/model.16/Split_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        4.274110317230225
+      ],
+      "scale": [
+        0.017853234912834914
+      ],
+      "zero_point": [
+        -112
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        4.274110317230225
+      ]
+    },
+    "/model.16/Split_output_1": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        3.936971426010132
+      ],
+      "scale": [
+        0.01653112161393259
+      ],
+      "zero_point": [
+        -111
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        3.936971426010132
+      ]
+    },
+    "/model.16/m.0/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -3.0025947093963623
+      ],
+      "max": [
+        2.1725635528564453
+      ],
+      "scale": [
+        0.020294738283344344
+      ],
+      "zero_point": [
+        20
+      ],
+      "ori_min": [
+        -3.0025947093963623
+      ],
+      "ori_max": [
+        2.1725635528564453
+      ]
+    },
+    "/model.16/m.0/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        1.9504375457763672
+      ],
+      "scale": [
+        0.008740792671839396
+      ],
+      "zero_point": [
+        -96
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        1.9504375457763672
+      ]
+    },
+    "/model.16/m.0/m/m.0/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -7.060909271240234
+      ],
+      "max": [
+        6.727632522583008
+      ],
+      "scale": [
+        0.05407271291695389
+      ],
+      "zero_point": [
+        3
+      ],
+      "ori_min": [
+        -7.060909271240234
+      ],
+      "ori_max": [
+        6.727632522583008
+      ]
+    },
+    "/model.16/m.0/m/m.0/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        6.7195868492126465
+      ],
+      "scale": [
+        0.027443338959824804
+      ],
+      "zero_point": [
+        -118
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        6.7195868492126465
+      ]
+    },
+    "/model.16/m.0/m/m.0/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -10.875960350036621
+      ],
+      "max": [
+        5.656317234039307
+      ],
+      "scale": [
+        0.06483246111402324
+      ],
+      "zero_point": [
+        40
+      ],
+      "ori_min": [
+        -10.875960350036621
+      ],
+      "ori_max": [
+        5.656317234039307
+      ]
+    },
+    "/model.16/m.0/m/m.0/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        5.63661527633667
+      ],
+      "scale": [
+        0.02319639161521313
+      ],
+      "zero_point": [
+        -116
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        5.63661527633667
+      ]
+    },
+    "/model.16/m.0/m/m.0/Add_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.5569289922714233
+      ],
+      "max": [
+        5.609539985656738
+      ],
+      "scale": [
+        0.02418223128599279
+      ],
+      "zero_point": [
+        -105
+      ],
+      "ori_min": [
+        -0.5569289922714233
+      ],
+      "ori_max": [
+        5.609539985656738
+      ]
+    },
+    "/model.16/m.0/m/m.1/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -10.308538436889648
+      ],
+      "max": [
+        7.084397792816162
+      ],
+      "scale": [
+        0.06820759305766985
+      ],
+      "zero_point": [
+        23
+      ],
+      "ori_min": [
+        -10.308538436889648
+      ],
+      "ori_max": [
+        7.084397792816162
+      ]
+    },
+    "/model.16/m.0/m/m.1/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        7.078465938568115
+      ],
+      "scale": [
+        0.028850707937689388
+      ],
+      "zero_point": [
+        -118
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        7.078465938568115
+      ]
+    },
+    "/model.16/m.0/m/m.1/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -44.69380187988281
+      ],
+      "max": [
+        63.13957214355469
+      ],
+      "scale": [
+        0.4228759765625
+      ],
+      "zero_point": [
+        -22
+      ],
+      "ori_min": [
+        -44.69380187988281
+      ],
+      "ori_max": [
+        63.13957214355469
+      ]
+    },
+    "/model.16/m.0/m/m.1/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        63.13957214355469
+      ],
+      "scale": [
+        0.24869818325136223
+      ],
+      "zero_point": [
+        -127
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        63.13957214355469
+      ]
+    },
+    "/model.16/m.0/m/m.1/Add_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.8352324962615967
+      ],
+      "max": [
+        66.0191879272461
+      ],
+      "scale": [
+        0.26217419773924583
+      ],
+      "zero_point": [
+        -125
+      ],
+      "ori_min": [
+        -0.8352324962615967
+      ],
+      "ori_max": [
+        66.0191879272461
+      ]
+    },
+    "/model.16/m.0/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -9.609272003173828
+      ],
+      "max": [
+        11.204338073730469
+      ],
+      "scale": [
+        0.08162200030158548
+      ],
+      "zero_point": [
+        -10
+      ],
+      "ori_min": [
+        -9.609272003173828
+      ],
+      "ori_max": [
+        11.204338073730469
+      ]
+    },
+    "/model.16/m.0/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        11.204185485839844
+      ],
+      "scale": [
+        0.04503000027993146
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        11.204185485839844
+      ]
+    },
+    "/model.16/m.0/Concat_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.8352324962615967
+      ],
+      "max": [
+        66.0191879272461
+      ],
+      "scale": [
+        0.26217419773924583
+      ],
+      "zero_point": [
+        -125
+      ],
+      "ori_min": [
+        -0.8352324962615967
+      ],
+      "ori_max": [
+        66.0191879272461
+      ]
+    },
+    "/model.16/m.0/cv3/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -88.27381134033203
+      ],
+      "max": [
+        19.88715171813965
+      ],
+      "scale": [
+        0.424160639444987
+      ],
+      "zero_point": [
+        80
+      ],
+      "ori_min": [
+        -88.27381134033203
+      ],
+      "ori_max": [
+        19.88715171813965
+      ]
+    },
+    "/model.16/m.0/cv3/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        19.88715171813965
+      ],
+      "scale": [
+        0.07908084824973462
+      ],
+      "zero_point": [
+        -124
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        19.88715171813965
+      ]
+    },
+    "/model.16/Concat_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        19.88715171813965
+      ],
+      "scale": [
+        0.07908084824973462
+      ],
+      "zero_point": [
+        -124
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        19.88715171813965
+      ]
+    },
+    "/model.16/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -21.972013473510742
+      ],
+      "max": [
+        5.523646354675293
+      ],
+      "scale": [
+        0.10782611697327857
+      ],
+      "zero_point": [
+        76
+      ],
+      "ori_min": [
+        -21.972013473510742
+      ],
+      "ori_max": [
+        5.523646354675293
+      ]
+    },
+    "/model.16/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        5.501687526702881
+      ],
+      "scale": [
+        0.022667263185276704
+      ],
+      "zero_point": [
+        -116
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        5.501687526702881
+      ]
+    },
+    "/model.17/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -8.590102195739746
+      ],
+      "max": [
+        6.355005741119385
+      ],
+      "scale": [
+        0.058608266419055415
+      ],
+      "zero_point": [
+        19
+      ],
+      "ori_min": [
+        -8.590102195739746
+      ],
+      "ori_max": [
+        6.355005741119385
+      ]
+    },
+    "/model.17/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        6.343979835510254
+      ],
+      "scale": [
+        0.025970370278638952
+      ],
+      "zero_point": [
+        -117
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        6.343979835510254
+      ]
+    },
+    "/model.18/Concat_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        6.343979835510254
+      ],
+      "scale": [
+        0.025970370278638952
+      ],
+      "zero_point": [
+        -117
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        6.343979835510254
+      ]
+    },
+    "/model.19/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -10.429828643798828
+      ],
+      "max": [
+        10.212808609008789
+      ],
+      "scale": [
+        0.08095151863846124
+      ],
+      "zero_point": [
+        1
+      ],
+      "ori_min": [
+        -10.429828643798828
+      ],
+      "ori_max": [
+        10.212808609008789
+      ]
+    },
+    "/model.19/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        10.212433815002441
+      ],
+      "scale": [
+        0.04114077804135341
+      ],
+      "zero_point": [
+        -121
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        10.212433815002441
+      ]
+    },
+    "/model.19/Split_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        10.212433815002441
+      ],
+      "scale": [
+        0.04114077804135341
+      ],
+      "zero_point": [
+        -121
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        10.212433815002441
+      ]
+    },
+    "/model.19/Split_output_1": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        8.733833312988281
+      ],
+      "scale": [
+        0.03534234470012141
+      ],
+      "zero_point": [
+        -120
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        8.733833312988281
+      ]
+    },
+    "/model.19/m.0/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -4.622048377990723
+      ],
+      "max": [
+        2.379608631134033
+      ],
+      "scale": [
+        0.027457478467155905
+      ],
+      "zero_point": [
+        40
+      ],
+      "ori_min": [
+        -4.622048377990723
+      ],
+      "ori_max": [
+        2.379608631134033
+      ]
+    },
+    "/model.19/m.0/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        2.1779584884643555
+      ],
+      "scale": [
+        0.009633031662772684
+      ],
+      "zero_point": [
+        -99
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        2.1779584884643555
+      ]
+    },
+    "/model.19/m.0/m/m.0/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -7.688300132751465
+      ],
+      "max": [
+        5.978518009185791
+      ],
+      "scale": [
+        0.05359536526249904
+      ],
+      "zero_point": [
+        15
+      ],
+      "ori_min": [
+        -7.688300132751465
+      ],
+      "ori_max": [
+        5.978518009185791
+      ]
+    },
+    "/model.19/m.0/m/m.0/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        5.963415145874023
+      ],
+      "scale": [
+        0.02447795973104589
+      ],
+      "zero_point": [
+        -117
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        5.963415145874023
+      ]
+    },
+    "/model.19/m.0/m/m.0/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -8.308089256286621
+      ],
+      "max": [
+        5.462140083312988
+      ],
+      "scale": [
+        0.054000899370978864
+      ],
+      "zero_point": [
+        26
+      ],
+      "ori_min": [
+        -8.308089256286621
+      ],
+      "ori_max": [
+        5.462140083312988
+      ]
+    },
+    "/model.19/m.0/m/m.0/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        5.439054489135742
+      ],
+      "scale": [
+        0.022421643430111455
+      ],
+      "zero_point": [
+        -116
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        5.439054489135742
+      ]
+    },
+    "/model.19/m.0/m/m.0/Add_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.5569290518760681
+      ],
+      "max": [
+        5.207142353057861
+      ],
+      "scale": [
+        0.022604201587976193
+      ],
+      "zero_point": [
+        -103
+      ],
+      "ori_min": [
+        -0.5569290518760681
+      ],
+      "ori_max": [
+        5.207142353057861
+      ]
+    },
+    "/model.19/m.0/m/m.1/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -13.073768615722656
+      ],
+      "max": [
+        10.278797149658203
+      ],
+      "scale": [
+        0.09157868927600336
+      ],
+      "zero_point": [
+        15
+      ],
+      "ori_min": [
+        -13.073768615722656
+      ],
+      "ori_max": [
+        10.278797149658203
+      ]
+    },
+    "/model.19/m.0/m/m.1/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        10.278444290161133
+      ],
+      "scale": [
+        0.041399642649818866
+      ],
+      "zero_point": [
+        -121
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        10.278444290161133
+      ]
+    },
+    "/model.19/m.0/m/m.1/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -20.936016082763672
+      ],
+      "max": [
+        23.17780113220215
+      ],
+      "scale": [
+        0.17299536162731693
+      ],
+      "zero_point": [
+        -7
+      ],
+      "ori_min": [
+        -20.936016082763672
+      ],
+      "ori_max": [
+        23.17780113220215
+      ]
+    },
+    "/model.19/m.0/m/m.1/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        23.17780113220215
+      ],
+      "scale": [
+        0.09198535575586207
+      ],
+      "zero_point": [
+        -125
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        23.17780113220215
+      ]
+    },
+    "/model.19/m.0/m/m.1/Add_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.8353574872016907
+      ],
+      "max": [
+        22.934661865234375
+      ],
+      "scale": [
+        0.09321576216641594
+      ],
+      "zero_point": [
+        -119
+      ],
+      "ori_min": [
+        -0.8353574872016907
+      ],
+      "ori_max": [
+        22.934661865234375
+      ]
+    },
+    "/model.19/m.0/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -11.527213096618652
+      ],
+      "max": [
+        9.530374526977539
+      ],
+      "scale": [
+        0.08257877499449487
+      ],
+      "zero_point": [
+        12
+      ],
+      "ori_min": [
+        -11.527213096618652
+      ],
+      "ori_max": [
+        9.530374526977539
+      ]
+    },
+    "/model.19/m.0/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        9.529683113098145
+      ],
+      "scale": [
+        0.038463324308395386
+      ],
+      "zero_point": [
+        -121
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        9.529683113098145
+      ]
+    },
+    "/model.19/m.0/Concat_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.8353574872016907
+      ],
+      "max": [
+        22.934661865234375
+      ],
+      "scale": [
+        0.09321576216641594
+      ],
+      "zero_point": [
+        -119
+      ],
+      "ori_min": [
+        -0.8353574872016907
+      ],
+      "ori_max": [
+        22.934661865234375
+      ]
+    },
+    "/model.19/m.0/cv3/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -24.59603500366211
+      ],
+      "max": [
+        23.21234893798828
+      ],
+      "scale": [
+        0.18748385859470743
+      ],
+      "zero_point": [
+        3
+      ],
+      "ori_min": [
+        -24.59603500366211
+      ],
+      "ori_max": [
+        23.21234893798828
+      ]
+    },
+    "/model.19/m.0/cv3/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        23.21234893798828
+      ],
+      "scale": [
+        0.09212083734718024
+      ],
+      "zero_point": [
+        -125
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        23.21234893798828
+      ]
+    },
+    "/model.19/Concat_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        23.21234893798828
+      ],
+      "scale": [
+        0.09212083734718024
+      ],
+      "zero_point": [
+        -125
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        23.21234893798828
+      ]
+    },
+    "/model.19/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -36.46608352661133
+      ],
+      "max": [
+        7.775544166564941
+      ],
+      "scale": [
+        0.17349657918892655
+      ],
+      "zero_point": [
+        82
+      ],
+      "ori_min": [
+        -36.46608352661133
+      ],
+      "ori_max": [
+        7.775544166564941
+      ]
+    },
+    "/model.19/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        7.772281169891357
+      ],
+      "scale": [
+        0.031571551982094256
+      ],
+      "zero_point": [
+        -119
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        7.772281169891357
+      ]
+    },
+    "/model.20/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -11.074387550354004
+      ],
+      "max": [
+        11.820585250854492
+      ],
+      "scale": [
+        0.08978420706356273
+      ],
+      "zero_point": [
+        -5
+      ],
+      "ori_min": [
+        -11.074387550354004
+      ],
+      "ori_max": [
+        11.820585250854492
+      ]
+    },
+    "/model.20/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        11.820497512817383
+      ],
+      "scale": [
+        0.0474469101896473
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        11.820497512817383
+      ]
+    },
+    "/model.21/Concat_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        12.277754783630371
+      ],
+      "scale": [
+        0.049240075957541374
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        12.277754783630371
+      ]
+    },
+    "/model.22/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -23.006099700927734
+      ],
+      "max": [
+        13.240047454833984
+      ],
+      "scale": [
+        0.14214175355200673
+      ],
+      "zero_point": [
+        34
+      ],
+      "ori_min": [
+        -23.006099700927734
+      ],
+      "ori_max": [
+        13.240047454833984
+      ]
+    },
+    "/model.22/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        13.240023612976074
+      ],
+      "scale": [
+        0.053013679209877464
+      ],
+      "zero_point": [
+        -123
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        13.240023612976074
+      ]
+    },
+    "/model.22/Split_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        13.240023612976074
+      ],
+      "scale": [
+        0.053013679209877464
+      ],
+      "zero_point": [
+        -123
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        13.240023612976074
+      ]
+    },
+    "/model.22/Split_output_1": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        7.039370059967041
+      ],
+      "scale": [
+        0.028697390766704783
+      ],
+      "zero_point": [
+        -118
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        7.039370059967041
+      ]
+    },
+    "/model.22/m.0/m.0.0/cv1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -9.275355339050293
+      ],
+      "max": [
+        10.541061401367188
+      ],
+      "scale": [
+        0.07771143819771562
+      ],
+      "zero_point": [
+        -9
+      ],
+      "ori_min": [
+        -9.275355339050293
+      ],
+      "ori_max": [
+        10.541061401367188
+      ]
+    },
+    "/model.22/m.0/m.0.0/cv1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        10.54078197479248
+      ],
+      "scale": [
+        0.04242841788366729
+      ],
+      "zero_point": [
+        -121
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        10.54078197479248
+      ]
+    },
+    "/model.22/m.0/m.0.0/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -17.64735984802246
+      ],
+      "max": [
+        10.560741424560547
+      ],
+      "scale": [
+        0.1106200049905216
+      ],
+      "zero_point": [
+        32
+      ],
+      "ori_min": [
+        -17.64735984802246
+      ],
+      "ori_max": [
+        10.560741424560547
+      ]
+    },
+    "/model.22/m.0/m.0.0/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        10.560468673706055
+      ],
+      "scale": [
+        0.04250562062450484
+      ],
+      "zero_point": [
+        -121
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        10.560468673706055
+      ]
+    },
+    "/model.22/m.0/m.0.0/Add_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.5569291114807129
+      ],
+      "max": [
+        13.172850608825684
+      ],
+      "scale": [
+        0.05384227341296626
+      ],
+      "zero_point": [
+        -118
+      ],
+      "ori_min": [
+        -0.5569291114807129
+      ],
+      "ori_max": [
+        13.172850608825684
+      ]
+    },
+    "/model.22/m.0/m.0.1/attn/qkv/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -12.241495132446289
+      ],
+      "max": [
+        10.737503051757812
+      ],
+      "scale": [
+        0.09011371836942784
+      ],
+      "zero_point": [
+        8
+      ],
+      "ori_min": [
+        -12.241495132446289
+      ],
+      "ori_max": [
+        10.737503051757812
+      ]
+    },
+    "/model.22/m.0/m.0.1/attn/Reshape_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -12.241495132446289
+      ],
+      "max": [
+        10.737503051757812
+      ],
+      "scale": [
+        0.09011371836942784
+      ],
+      "zero_point": [
+        8
+      ],
+      "ori_min": [
+        -12.241495132446289
+      ],
+      "ori_max": [
+        10.737503051757812
+      ]
+    },
+    "/model.22/m.0/m.0.1/attn/Split_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -11.214487075805664
+      ],
+      "max": [
+        9.761454582214355
+      ],
+      "scale": [
+        0.08225859473733341
+      ],
+      "zero_point": [
+        8
+      ],
+      "ori_min": [
+        -11.214487075805664
+      ],
+      "ori_max": [
+        9.761454582214355
+      ]
+    },
+    "/model.22/m.0/m.0.1/attn/Split_output_1": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -9.321199417114258
+      ],
+      "max": [
+        9.901379585266113
+      ],
+      "scale": [
+        0.07538266275443282
+      ],
+      "zero_point": [
+        -4
+      ],
+      "ori_min": [
+        -9.321199417114258
+      ],
+      "ori_max": [
+        9.901379585266113
+      ]
+    },
+    "/model.22/m.0/m.0.1/attn/Split_output_2": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -12.241495132446289
+      ],
+      "max": [
+        10.737503051757812
+      ],
+      "scale": [
+        0.09011371836942784
+      ],
+      "zero_point": [
+        8
+      ],
+      "ori_min": [
+        -12.241495132446289
+      ],
+      "ori_max": [
+        10.737503051757812
+      ]
+    },
+    "/model.22/m.0/m.0.1/attn/Reshape_2_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -12.241495132446289
+      ],
+      "max": [
+        10.737503051757812
+      ],
+      "scale": [
+        0.09011371836942784
+      ],
+      "zero_point": [
+        8
+      ],
+      "ori_min": [
+        -12.241495132446289
+      ],
+      "ori_max": [
+        10.737503051757812
+      ]
+    },
+    "/model.22/m.0/m.0.1/attn/pe/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -9.955578804016113
+      ],
+      "max": [
+        8.808416366577148
+      ],
+      "scale": [
+        0.07358429478664025
+      ],
+      "zero_point": [
+        7
+      ],
+      "ori_min": [
+        -9.955578804016113
+      ],
+      "ori_max": [
+        8.808416366577148
+      ]
+    },
+    "/model.23/one2one_cv2.0/one2one_cv2.0.0/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -50.445743560791016
+      ],
+      "max": [
+        26.59933853149414
+      ],
+      "scale": [
+        0.3021375768324908
+      ],
+      "zero_point": [
+        39
+      ],
+      "ori_min": [
+        -50.445743560791016
+      ],
+      "ori_max": [
+        26.59933853149414
+      ]
+    },
+    "/model.23/one2one_cv2.0/one2one_cv2.0.0/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        26.59933853149414
+      ],
+      "scale": [
+        0.10540314947857576
+      ],
+      "zero_point": [
+        -125
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        26.59933853149414
+      ]
+    },
+    "/model.23/one2one_cv2.0/one2one_cv2.0.1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -28.16515350341797
+      ],
+      "max": [
+        7.98355770111084
+      ],
+      "scale": [
+        0.1417596517824659
+      ],
+      "zero_point": [
+        71
+      ],
+      "ori_min": [
+        -28.16515350341797
+      ],
+      "ori_max": [
+        7.98355770111084
+      ]
+    },
+    "/model.23/one2one_cv2.0/one2one_cv2.0.1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        7.980835914611816
+      ],
+      "scale": [
+        0.03238941372609606
+      ],
+      "zero_point": [
+        -119
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        7.980835914611816
+      ]
+    },
+    "/model.23/one2one_cv2.0/one2one_cv2.0.2/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.9459018707275391
+      ],
+      "max": [
+        9.681544303894043
+      ],
+      "scale": [
+        0.04167625950831993
+      ],
+      "zero_point": [
+        -105
+      ],
+      "ori_min": [
+        -0.9459018707275391
+      ],
+      "ori_max": [
+        9.681544303894043
+      ]
+    },
+    "/model.23/one2one_cv2.1/one2one_cv2.1.0/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -21.465871810913086
+      ],
+      "max": [
+        15.106056213378906
+      ],
+      "scale": [
+        0.1434193255854588
+      ],
+      "zero_point": [
+        22
+      ],
+      "ori_min": [
+        -21.465871810913086
+      ],
+      "ori_max": [
+        15.106056213378906
+      ]
+    },
+    "/model.23/one2one_cv2.1/one2one_cv2.1.0/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        15.10605239868164
+      ],
+      "scale": [
+        0.06033143915382086
+      ],
+      "zero_point": [
+        -123
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        15.10605239868164
+      ]
+    },
+    "/model.23/one2one_cv2.1/one2one_cv2.1.1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -19.35985565185547
+      ],
+      "max": [
+        13.50949764251709
+      ],
+      "scale": [
+        0.12889942468381396
+      ],
+      "zero_point": [
+        22
+      ],
+      "ori_min": [
+        -19.35985565185547
+      ],
+      "ori_max": [
+        13.50949764251709
+      ]
+    },
+    "/model.23/one2one_cv2.1/one2one_cv2.1.1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846455574035645
+      ],
+      "max": [
+        13.509479522705078
+      ],
+      "scale": [
+        0.05407036893508014
+      ],
+      "zero_point": [
+        -123
+      ],
+      "ori_min": [
+        -0.27846455574035645
+      ],
+      "ori_max": [
+        13.509479522705078
+      ]
+    },
+    "/model.23/one2one_cv2.1/one2one_cv2.1.2/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.319272518157959
+      ],
+      "max": [
+        13.52539348602295
+      ],
+      "scale": [
+        0.05429280785953297
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.319272518157959
+      ],
+      "ori_max": [
+        13.52539348602295
+      ]
+    },
+    "/model.23/Reshape_1_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.319272518157959
+      ],
+      "max": [
+        13.52539348602295
+      ],
+      "scale": [
+        0.05429280785953297
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.319272518157959
+      ],
+      "ori_max": [
+        13.52539348602295
+      ]
+    },
+    "/model.23/one2one_cv3.0/one2one_cv3.0.0/one2one_cv3.0.0.0/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -10.584613800048828
+      ],
+      "max": [
+        11.748042106628418
+      ],
+      "scale": [
+        0.08757904277128332
+      ],
+      "zero_point": [
+        -7
+      ],
+      "ori_min": [
+        -10.584613800048828
+      ],
+      "ori_max": [
+        11.748042106628418
+      ]
+    },
+    "/model.23/one2one_cv3.0/one2one_cv3.0.0/one2one_cv3.0.0.0/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        11.747949600219727
+      ],
+      "scale": [
+        0.04716240857161728
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        11.747949600219727
+      ]
+    },
+    "/model.23/one2one_cv3.0/one2one_cv3.0.0/one2one_cv3.0.0.1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -13.305625915527344
+      ],
+      "max": [
+        7.80864143371582
+      ],
+      "scale": [
+        0.08280104842840456
+      ],
+      "zero_point": [
+        33
+      ],
+      "ori_min": [
+        -13.305625915527344
+      ],
+      "ori_max": [
+        7.80864143371582
+      ]
+    },
+    "/model.23/one2one_cv3.0/one2one_cv3.0.0/one2one_cv3.0.0.1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        7.8054704666137695
+      ],
+      "scale": [
+        0.031701706086888035
+      ],
+      "zero_point": [
+        -119
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        7.8054704666137695
+      ]
+    },
+    "/model.23/one2one_cv3.0/one2one_cv3.0.1/one2one_cv3.0.1.0/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -51.45806884765625
+      ],
+      "max": [
+        45.35649871826172
+      ],
+      "scale": [
+        0.3796649708467371
+      ],
+      "zero_point": [
+        8
+      ],
+      "ori_min": [
+        -51.45806884765625
+      ],
+      "ori_max": [
+        45.35649871826172
+      ]
+    },
+    "/model.23/one2one_cv3.0/one2one_cv3.0.1/one2one_cv3.0.1.0/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        45.35649871826172
+      ],
+      "scale": [
+        0.17896064040707607
+      ],
+      "zero_point": [
+        -126
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        45.35649871826172
+      ]
+    },
+    "/model.23/one2one_cv3.0/one2one_cv3.0.1/one2one_cv3.0.1.1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -175.0993194580078
+      ],
+      "max": [
+        70.29844665527344
+      ],
+      "scale": [
+        0.9623441808363971
+      ],
+      "zero_point": [
+        54
+      ],
+      "ori_min": [
+        -175.0993194580078
+      ],
+      "ori_max": [
+        70.29844665527344
+      ]
+    },
+    "/model.23/one2one_cv3.0/one2one_cv3.0.1/one2one_cv3.0.1.1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        70.29844665527344
+      ],
+      "scale": [
+        0.27677220094437693
+      ],
+      "zero_point": [
+        -127
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        70.29844665527344
+      ]
+    },
+    "/model.23/one2one_cv3.0/one2one_cv3.0.2/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -7.0
+      ],
+      "max": [
+        2.2960872650146484
+      ],
+      "scale": [
+        0.03645524417652803
+      ],
+      "zero_point": [
+        64
+      ],
+      "ori_min": [
+        -50.81082534790039
+      ],
+      "ori_max": [
+        2.2960872650146484
+      ]
+    },
+    "/model.23/one2one_cv3.1/one2one_cv3.1.0/one2one_cv3.1.0.0/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -13.360252380371094
+      ],
+      "max": [
+        28.871307373046875
+      ],
+      "scale": [
+        0.16561395981732538
+      ],
+      "zero_point": [
+        -47
+      ],
+      "ori_min": [
+        -13.360252380371094
+      ],
+      "ori_max": [
+        28.871307373046875
+      ]
+    },
+    "/model.23/one2one_cv3.1/one2one_cv3.1.0/one2one_cv3.1.0.0/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        28.871307373046875
+      ],
+      "scale": [
+        0.11431283121015512
+      ],
+      "zero_point": [
+        -126
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        28.871307373046875
+      ]
+    },
+    "/model.23/one2one_cv3.1/one2one_cv3.1.0/one2one_cv3.1.0.1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -30.072080612182617
+      ],
+      "max": [
+        13.463650703430176
+      ],
+      "scale": [
+        0.17072835810044232
+      ],
+      "zero_point": [
+        48
+      ],
+      "ori_min": [
+        -30.072080612182617
+      ],
+      "ori_max": [
+        13.463650703430176
+      ]
+    },
+    "/model.23/one2one_cv3.1/one2one_cv3.1.0/one2one_cv3.1.0.1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        13.463631629943848
+      ],
+      "scale": [
+        0.05389057339406481
+      ],
+      "zero_point": [
+        -123
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        13.463631629943848
+      ]
+    },
+    "/model.23/one2one_cv3.1/one2one_cv3.1.1/one2one_cv3.1.1.0/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -56.51387405395508
+      ],
+      "max": [
+        55.963340759277344
+      ],
+      "scale": [
+        0.4410871169146369
+      ],
+      "zero_point": [
+        0
+      ],
+      "ori_min": [
+        -56.51387405395508
+      ],
+      "ori_max": [
+        55.963340759277344
+      ]
+    },
+    "/model.23/one2one_cv3.1/one2one_cv3.1.1/one2one_cv3.1.1.0/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        55.963340759277344
+      ],
+      "scale": [
+        0.22055609939145107
+      ],
+      "zero_point": [
+        -127
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        55.963340759277344
+      ]
+    },
+    "/model.23/one2one_cv3.1/one2one_cv3.1.1/one2one_cv3.1.1.1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -250.73619079589844
+      ],
+      "max": [
+        125.75750732421875
+      ],
+      "scale": [
+        1.4764458749808518
+      ],
+      "zero_point": [
+        42
+      ],
+      "ori_min": [
+        -250.73619079589844
+      ],
+      "ori_max": [
+        125.75750732421875
+      ]
+    },
+    "/model.23/one2one_cv3.1/one2one_cv3.1.1/one2one_cv3.1.1.1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        125.75750732421875
+      ],
+      "scale": [
+        0.4942587133716134
+      ],
+      "zero_point": [
+        -127
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        125.75750732421875
+      ]
+    },
+    "/model.23/one2one_cv3.1/one2one_cv3.1.2/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -7.0
+      ],
+      "max": [
+        3.0722618103027344
+      ],
+      "scale": [
+        0.03949906592275582
+      ],
+      "zero_point": [
+        49
+      ],
+      "ori_min": [
+        -92.59152221679688
+      ],
+      "ori_max": [
+        3.0722618103027344
+      ]
+    },
+    "/model.23/Reshape_4_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -7.0
+      ],
+      "max": [
+        3.0722618103027344
+      ],
+      "scale": [
+        0.03949906592275582
+      ],
+      "zero_point": [
+        49
+      ],
+      "ori_min": [
+        -92.59152221679688
+      ],
+      "ori_max": [
+        3.0722618103027344
+      ]
+    },
+    "/model.22/m.0/m.0.1/attn/MatMul_1_output_0_mm": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -12.240861892700195
+      ],
+      "max": [
+        9.808987617492676
+      ],
+      "scale": [
+        0.08646999807918773
+      ],
+      "zero_point": [
+        14
+      ],
+      "ori_min": [
+        -12.240861892700195
+      ],
+      "ori_max": [
+        9.808987617492676
+      ]
+    },
+    "/model.22/m.0/m.0.1/attn/MatMul_1#1_2sdpa_q_matmul": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -149.19168090820312
+      ],
+      "max": [
+        198.35623168945312
+      ],
+      "scale": [
+        1.3629329905790442
+      ],
+      "zero_point": [
+        -19
+      ],
+      "ori_min": [
+        -149.19168090820312
+      ],
+      "ori_max": [
+        198.35623168945312
+      ]
+    },
+    "/model.22/m.0/m.0.1/attn/MatMul_1#1_2sdpa_q_softmax": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        0.0
+      ],
+      "max": [
+        0.9999991655349731
+      ],
+      "scale": [
+        0.00392156535503911
+      ],
+      "zero_point": [
+        -128
+      ],
+      "ori_min": [
+        4.319106936102308e-24
+      ],
+      "ori_max": [
+        0.9999991655349731
+      ]
+    },
+    "/model.22/m.0/m.0.1/attn/Reshape_1_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -12.240861892700195
+      ],
+      "max": [
+        9.808987617492676
+      ],
+      "scale": [
+        0.08646999807918773
+      ],
+      "zero_point": [
+        14
+      ],
+      "ori_min": [
+        -12.240861892700195
+      ],
+      "ori_max": [
+        9.808987617492676
+      ]
+    },
+    "/model.22/m.0/m.0.1/attn/Add_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -11.126955032348633
+      ],
+      "max": [
+        9.734159469604492
+      ],
+      "scale": [
+        0.08180829216452205
+      ],
+      "zero_point": [
+        8
+      ],
+      "ori_min": [
+        -11.126955032348633
+      ],
+      "ori_max": [
+        9.734159469604492
+      ]
+    },
+    "/model.22/m.0/m.0.1/attn/proj/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -9.84476375579834
+      ],
+      "max": [
+        7.254019737243652
+      ],
+      "scale": [
+        0.06705405291389016
+      ],
+      "zero_point": [
+        19
+      ],
+      "ori_min": [
+        -9.84476375579834
+      ],
+      "ori_max": [
+        7.254019737243652
+      ]
+    },
+    "/model.22/m.0/m.0.1/Add_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -6.987176418304443
+      ],
+      "max": [
+        16.4848575592041
+      ],
+      "scale": [
+        0.09204719206866097
+      ],
+      "zero_point": [
+        -52
+      ],
+      "ori_min": [
+        -6.987176418304443
+      ],
+      "ori_max": [
+        16.4848575592041
+      ]
+    },
+    "/model.22/m.0/m.0.1/ffn/ffn.0/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -17.71278190612793
+      ],
+      "max": [
+        16.673770904541016
+      ],
+      "scale": [
+        0.13484922670850566
+      ],
+      "zero_point": [
+        3
+      ],
+      "ori_min": [
+        -17.71278190612793
+      ],
+      "ori_max": [
+        16.673770904541016
+      ]
+    },
+    "/model.22/m.0/m.0.1/ffn/ffn.0/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        16.673770904541016
+      ],
+      "scale": [
+        0.06647935486307331
+      ],
+      "zero_point": [
+        -124
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        16.673770904541016
+      ]
+    },
+    "/model.22/m.0/m.0.1/ffn/ffn.1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -9.987701416015625
+      ],
+      "max": [
+        9.500100135803223
+      ],
+      "scale": [
+        0.07642275118360332
+      ],
+      "zero_point": [
+        3
+      ],
+      "ori_min": [
+        -9.987701416015625
+      ],
+      "ori_max": [
+        9.500100135803223
+      ]
+    },
+    "/model.22/m.0/m.0.1/Add_1_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -9.661624908447266
+      ],
+      "max": [
+        13.727395057678223
+      ],
+      "scale": [
+        0.09172164692598231
+      ],
+      "zero_point": [
+        -23
+      ],
+      "ori_min": [
+        -9.661624908447266
+      ],
+      "ori_max": [
+        13.727395057678223
+      ]
+    },
+    "/model.22/Concat_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -9.661624908447266
+      ],
+      "max": [
+        13.727395057678223
+      ],
+      "scale": [
+        0.09172164692598231
+      ],
+      "zero_point": [
+        -23
+      ],
+      "ori_min": [
+        -9.661624908447266
+      ],
+      "ori_max": [
+        13.727395057678223
+      ]
+    },
+    "/model.22/cv2/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -20.794111251831055
+      ],
+      "max": [
+        15.177021026611328
+      ],
+      "scale": [
+        0.14106326383702894
+      ],
+      "zero_point": [
+        19
+      ],
+      "ori_min": [
+        -20.794111251831055
+      ],
+      "ori_max": [
+        15.177021026611328
+      ]
+    },
+    "/model.22/cv2/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        15.177017211914062
+      ],
+      "scale": [
+        0.06060973253904604
+      ],
+      "zero_point": [
+        -123
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        15.177017211914062
+      ]
+    },
+    "/model.22/cv2/act/Mul_output_0_split": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        15.177017211914062
+      ],
+      "scale": [
+        0.06060973253904604
+      ],
+      "zero_point": [
+        -123
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        15.177017211914062
+      ]
+    },
+    "/model.22/cv2/act/Mul_output_0_split_o1": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        12.509568214416504
+      ],
+      "scale": [
+        0.05014914823513405
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        12.509568214416504
+      ]
+    },
+    "/model.23/one2one_cv2.2/one2one_cv2.2.0/conv/Conv_output_0_tile0_conv": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -12.224396705627441
+      ],
+      "max": [
+        8.737174034118652
+      ],
+      "scale": [
+        0.08220223819508272
+      ],
+      "zero_point": [
+        21
+      ],
+      "ori_min": [
+        -12.224396705627441
+      ],
+      "ori_max": [
+        8.737174034118652
+      ]
+    },
+    "/model.23/one2one_cv2.2/one2one_cv2.2.0/conv/Conv_output_0_tile1_conv": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -8.175063133239746
+      ],
+      "max": [
+        10.711565017700195
+      ],
+      "scale": [
+        0.0740652084350586
+      ],
+      "zero_point": [
+        -18
+      ],
+      "ori_min": [
+        -8.175063133239746
+      ],
+      "ori_max": [
+        10.711565017700195
+      ]
+    },
+    "/model.23/one2one_cv2.2/one2one_cv2.2.0/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -11.387384414672852
+      ],
+      "max": [
+        12.307056427001953
+      ],
+      "scale": [
+        0.09291937584970511
+      ],
+      "zero_point": [
+        -5
+      ],
+      "ori_min": [
+        -11.387384414672852
+      ],
+      "ori_max": [
+        12.307056427001953
+      ]
+    },
+    "/model.23/one2one_cv2.2/one2one_cv2.2.0/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        12.307001113891602
+      ],
+      "scale": [
+        0.04935476744876188
+      ],
+      "zero_point": [
+        -122
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        12.307001113891602
+      ]
+    },
+    "/model.23/one2one_cv2.2/one2one_cv2.2.1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -11.202308654785156
+      ],
+      "max": [
+        16.509790420532227
+      ],
+      "scale": [
+        0.10867489833457797
+      ],
+      "zero_point": [
+        -25
+      ],
+      "ori_min": [
+        -11.202308654785156
+      ],
+      "ori_max": [
+        16.509790420532227
+      ]
+    },
+    "/model.23/one2one_cv2.2/one2one_cv2.2.1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846455574035645
+      ],
+      "max": [
+        16.509788513183594
+      ],
+      "scale": [
+        0.06583628654479981
+      ],
+      "zero_point": [
+        -124
+      ],
+      "ori_min": [
+        -0.27846455574035645
+      ],
+      "ori_max": [
+        16.509788513183594
+      ]
+    },
+    "/model.23/one2one_cv2.2/one2one_cv2.2.2/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.03209030628204346
+      ],
+      "max": [
+        18.612382888793945
+      ],
+      "scale": [
+        0.07311558115716074
+      ],
+      "zero_point": [
+        -128
+      ],
+      "ori_min": [
+        -0.03209030628204346
+      ],
+      "ori_max": [
+        18.612382888793945
+      ]
+    },
+    "/model.23/Reshape_2_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.03209030628204346
+      ],
+      "max": [
+        18.612382888793945
+      ],
+      "scale": [
+        0.07311558115716074
+      ],
+      "zero_point": [
+        -128
+      ],
+      "ori_min": [
+        -0.03209030628204346
+      ],
+      "ori_max": [
+        18.612382888793945
+      ]
+    },
+    "/model.23/Concat_output_0-rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.9459018707275391
+      ],
+      "max": [
+        18.612382888793945
+      ],
+      "scale": [
+        0.07669915591969209
+      ],
+      "zero_point": [
+        -116
+      ],
+      "ori_min": [
+        -0.9459018707275391
+      ],
+      "ori_max": [
+        18.612382888793945
+      ]
+    },
+    "/model.23/Concat_output_0_rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.9459018707275391
+      ],
+      "max": [
+        18.612382888793945
+      ],
+      "scale": [
+        0.07669915591969209
+      ],
+      "zero_point": [
+        -116
+      ],
+      "ori_min": [
+        -0.9459018707275391
+      ],
+      "ori_max": [
+        18.612382888793945
+      ]
+    },
+    "/model.23/Slice_output_0-rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.8786976337432861
+      ],
+      "max": [
+        18.124773025512695
+      ],
+      "scale": [
+        0.07452341435002345
+      ],
+      "zero_point": [
+        -116
+      ],
+      "ori_min": [
+        -0.8786976337432861
+      ],
+      "ori_max": [
+        18.124773025512695
+      ]
+    },
+    "/model.23/Slice_1_output_0-rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.9459018707275391
+      ],
+      "max": [
+        18.612382888793945
+      ],
+      "scale": [
+        0.07669915591969209
+      ],
+      "zero_point": [
+        -116
+      ],
+      "ori_min": [
+        -0.9459018707275391
+      ],
+      "ori_max": [
+        18.612382888793945
+      ]
+    },
+    "/model.23/one2one_cv3.2/one2one_cv3.2.0/one2one_cv3.2.0.0/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -22.119537353515625
+      ],
+      "max": [
+        37.7685432434082
+      ],
+      "scale": [
+        0.23485521802715226
+      ],
+      "zero_point": [
+        -34
+      ],
+      "ori_min": [
+        -22.119537353515625
+      ],
+      "ori_max": [
+        37.7685432434082
+      ]
+    },
+    "/model.23/one2one_cv3.2/one2one_cv3.2.0/one2one_cv3.2.0.0/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        37.7685432434082
+      ],
+      "scale": [
+        0.14920395227039562
+      ],
+      "zero_point": [
+        -126
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        37.7685432434082
+      ]
+    },
+    "/model.23/one2one_cv3.2/one2one_cv3.2.0/one2one_cv3.2.0.1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -17.13422393798828
+      ],
+      "max": [
+        14.588332176208496
+      ],
+      "scale": [
+        0.12440218083998736
+      ],
+      "zero_point": [
+        10
+      ],
+      "ori_min": [
+        -17.13422393798828
+      ],
+      "ori_max": [
+        14.588332176208496
+      ]
+    },
+    "/model.23/one2one_cv3.2/one2one_cv3.2.0/one2one_cv3.2.0.1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        14.588325500488281
+      ],
+      "scale": [
+        0.05830113759227828
+      ],
+      "zero_point": [
+        -123
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        14.588325500488281
+      ]
+    },
+    "/model.23/one2one_cv3.2/one2one_cv3.2.1/one2one_cv3.2.1.0/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -50.753631591796875
+      ],
+      "max": [
+        57.72394943237305
+      ],
+      "scale": [
+        0.42540227852615653
+      ],
+      "zero_point": [
+        -9
+      ],
+      "ori_min": [
+        -50.753631591796875
+      ],
+      "ori_max": [
+        57.72394943237305
+      ]
+    },
+    "/model.23/one2one_cv3.2/one2one_cv3.2.1/one2one_cv3.2.1.0/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        57.72394943237305
+      ],
+      "scale": [
+        0.22746044712908128
+      ],
+      "zero_point": [
+        -127
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        57.72394943237305
+      ]
+    },
+    "/model.23/one2one_cv3.2/one2one_cv3.2.1/one2one_cv3.2.1.1/conv/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -56.055519104003906
+      ],
+      "max": [
+        101.98898315429688
+      ],
+      "scale": [
+        0.619782361797258
+      ],
+      "zero_point": [
+        -38
+      ],
+      "ori_min": [
+        -56.055519104003906
+      ],
+      "ori_max": [
+        101.98898315429688
+      ]
+    },
+    "/model.23/one2one_cv3.2/one2one_cv3.2.1/one2one_cv3.2.1.1/act/Mul_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -0.27846458554267883
+      ],
+      "max": [
+        101.98898315429688
+      ],
+      "scale": [
+        0.4010488146660375
+      ],
+      "zero_point": [
+        -127
+      ],
+      "ori_min": [
+        -0.27846458554267883
+      ],
+      "ori_max": [
+        101.98898315429688
+      ]
+    },
+    "/model.23/one2one_cv3.2/one2one_cv3.2.2/Conv_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -7.0
+      ],
+      "max": [
+        4.162114143371582
+      ],
+      "scale": [
+        0.04377299664067287
+      ],
+      "zero_point": [
+        32
+      ],
+      "ori_min": [
+        -93.33137512207031
+      ],
+      "ori_max": [
+        4.162114143371582
+      ]
+    },
+    "/model.23/Reshape_5_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -7.0
+      ],
+      "max": [
+        4.162114143371582
+      ],
+      "scale": [
+        0.04377299664067287
+      ],
+      "zero_point": [
+        32
+      ],
+      "ori_min": [
+        -93.33137512207031
+      ],
+      "ori_max": [
+        4.162114143371582
+      ]
+    },
+    "/model.23/Concat_1_output_0-rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -7.0
+      ],
+      "max": [
+        4.162114143371582
+      ],
+      "scale": [
+        0.04377299664067287
+      ],
+      "zero_point": [
+        32
+      ],
+      "ori_min": [
+        -93.33137512207031
+      ],
+      "ori_max": [
+        4.162114143371582
+      ]
+    },
+    "/model.23/Concat_1_output_0_sw": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        0.0
+      ],
+      "max": [
+        0.9846642017364502
+      ],
+      "scale": [
+        0.0038614282421037265
+      ],
+      "zero_point": [
+        -128
+      ],
+      "ori_min": [
+        0.0
+      ],
+      "ori_max": [
+        0.9846642017364502
+      ]
+    },
+    "/model.23/Sigmoid_output_0_rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        0.0
+      ],
+      "max": [
+        0.9846642017364502
+      ],
+      "scale": [
+        0.0038614282421037265
+      ],
+      "zero_point": [
+        -128
+      ],
+      "ori_min": [
+        0.0
+      ],
+      "ori_max": [
+        0.9846642017364502
+      ]
+    },
+    "/model.23/Sub_output_0-rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -3.2506985664367676
+      ],
+      "max": [
+        79.96614837646484
+      ],
+      "scale": [
+        0.326340576246673
+      ],
+      "zero_point": [
+        -118
+      ],
+      "ori_min": [
+        -3.2506985664367676
+      ],
+      "ori_max": [
+        79.96614837646484
+      ]
+    },
+    "/model.23/Add_1_output_0-rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        0.0
+      ],
+      "max": [
+        81.30652618408203
+      ],
+      "scale": [
+        0.31884912229051776
+      ],
+      "zero_point": [
+        -128
+      ],
+      "ori_min": [
+        0.06116437911987305
+      ],
+      "ori_max": [
+        81.30652618408203
+      ]
+    },
+    "/model.23/Concat_2_output_0-rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -3.2506985664367676
+      ],
+      "max": [
+        81.30652618408203
+      ],
+      "scale": [
+        0.33159695980595605
+      ],
+      "zero_point": [
+        -118
+      ],
+      "ori_min": [
+        -3.2506985664367676
+      ],
+      "ori_max": [
+        81.30652618408203
+      ]
+    },
+    "/model.23/Mul_2_output_0-rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -104.02235412597656
+      ],
+      "max": [
+        733.7169189453125
+      ],
+      "scale": [
+        3.285252051259957
+      ],
+      "zero_point": [
+        -96
+      ],
+      "ori_min": [
+        -104.02235412597656
+      ],
+      "ori_max": [
+        733.7169189453125
+      ]
+    },
+    "/model.23/Concat_3_output_0-rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -104.02235412597656
+      ],
+      "max": [
+        733.7169189453125
+      ],
+      "scale": [
+        3.285252051259957
+      ],
+      "zero_point": [
+        -96
+      ],
+      "ori_min": [
+        -104.02235412597656
+      ],
+      "ori_max": [
+        733.7169189453125
+      ]
+    },
+    "/model.23/Transpose_output_0-rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -104.02235412597656
+      ],
+      "max": [
+        733.7169189453125
+      ],
+      "scale": [
+        3.285252051259957
+      ],
+      "zero_point": [
+        -96
+      ],
+      "ori_min": [
+        -104.02235412597656
+      ],
+      "ori_max": [
+        733.7169189453125
+      ]
+    },
+    "/model.23/Split_output_0-rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -104.02235412597656
+      ],
+      "max": [
+        733.7169189453125
+      ],
+      "scale": [
+        3.285252051259957
+      ],
+      "zero_point": [
+        -96
+      ],
+      "ori_min": [
+        -104.02235412597656
+      ],
+      "ori_max": [
+        733.7169189453125
+      ]
+    },
+    "/model.23/Split_output_1-rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        0.0
+      ],
+      "max": [
+        0.9846642017364502
+      ],
+      "scale": [
+        0.0038614282421037265
+      ],
+      "zero_point": [
+        -128
+      ],
+      "ori_min": [
+        0.0
+      ],
+      "ori_max": [
+        0.9846642017364502
+      ]
+    },
+    "/model.23/ReduceMax_output_0-rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        0.0
+      ],
+      "max": [
+        0.9846642017364502
+      ],
+      "scale": [
+        0.0038614282421037265
+      ],
+      "zero_point": [
+        -128
+      ],
+      "ori_min": [
+        0.0
+      ],
+      "ori_max": [
+        0.9846642017364502
+      ]
+    },
+    "/model.23/ReduceMax_output_0_rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        0.0
+      ],
+      "max": [
+        0.9846642017364502
+      ],
+      "scale": [
+        0.0038614282421037265
+      ],
+      "zero_point": [
+        -128
+      ],
+      "ori_min": [
+        0.0
+      ],
+      "ori_max": [
+        0.9846642017364502
+      ]
+    },
+    "/model.23/TopK_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        0.0
+      ],
+      "max": [
+        0.9846642017364502
+      ],
+      "scale": [
+        0.0038614282421037265
+      ],
+      "zero_point": [
+        -128
+      ],
+      "ori_min": [
+        6.854534149169922e-07
+      ],
+      "ori_max": [
+        0.9846642017364502
+      ]
+    },
+    "/model.23/GatherElements_output_0-rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        0.0
+      ],
+      "max": [
+        0.9846642017364502
+      ],
+      "scale": [
+        0.0038614282421037265
+      ],
+      "zero_point": [
+        -128
+      ],
+      "ori_min": [
+        0.0
+      ],
+      "ori_max": [
+        0.9846642017364502
+      ]
+    },
+    "/model.23/Flatten_output_0_rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        0.0
+      ],
+      "max": [
+        0.9846642017364502
+      ],
+      "scale": [
+        0.0038614282421037265
+      ],
+      "zero_point": [
+        -128
+      ],
+      "ori_min": [
+        0.0
+      ],
+      "ori_max": [
+        0.9846642017364502
+      ]
+    },
+    "/model.23/TopK_1_output_0-rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        0.0
+      ],
+      "max": [
+        0.9846642017364502
+      ],
+      "scale": [
+        0.0038614282421037265
+      ],
+      "zero_point": [
+        -128
+      ],
+      "ori_min": [
+        1.2814998626708984e-06
+      ],
+      "ori_max": [
+        0.9846642017364502
+      ]
+    },
+    "/model.23/Unsqueeze_1_output_0_rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        0.0
+      ],
+      "max": [
+        0.9846642017364502
+      ],
+      "scale": [
+        0.0038614282421037265
+      ],
+      "zero_point": [
+        -128
+      ],
+      "ori_min": [
+        1.2814998626708984e-06
+      ],
+      "ori_max": [
+        0.9846642017364502
+      ]
+    },
+    "/model.23/Cast_2_output_0-rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        0.0
+      ],
+      "max": [
+        79.0
+      ],
+      "scale": [
+        0.30980392156862746
+      ],
+      "zero_point": [
+        -128
+      ],
+      "ori_min": [
+        0.0
+      ],
+      "ori_max": [
+        79.0
+      ]
+    },
+    "/model.23/GatherElements_1_output_0-rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -65.45033264160156
+      ],
+      "max": [
+        660.25634765625
+      ],
+      "scale": [
+        2.8459085501876533
+      ],
+      "zero_point": [
+        -105
+      ],
+      "ori_min": [
+        -65.45033264160156
+      ],
+      "ori_max": [
+        660.25634765625
+      ]
+    },
+    "output0-rs": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -65.45033264160156
+      ],
+      "max": [
+        660.25634765625
+      ],
+      "scale": [
+        2.8459085501876533
+      ],
+      "zero_point": [
+        -105
+      ],
+      "ori_min": [
+        -65.45033264160156
+      ],
+      "ori_max": [
+        660.25634765625
+      ]
+    },
+    "output0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "float32",
+      "min": [
+        -65.45033264160156
+      ],
+      "max": [
+        660.25634765625
+      ],
+      "scale": [],
+      "zero_point": [],
+      "ori_min": [
+        -65.45033264160156
+      ],
+      "ori_max": [
+        660.25634765625
+      ]
+    },
+    "/model.23/Constant_12_output_0": {
+      "qtype": "sym",
+      "qmethod": "layer",
+      "dtype": "int32",
+      "min": [
+        -79.5
+      ],
+      "max": [
+        79.5
+      ],
+      "scale": [
+        3.7020072358204086e-08
+      ],
+      "zero_point": [
+        0
+      ],
+      "ori_min": [
+        0.5
+      ],
+      "ori_max": [
+        79.5
+      ]
+    },
+    "/model.23/Constant_13_output_0": {
+      "qtype": "sym",
+      "qmethod": "layer",
+      "dtype": "int32",
+      "min": [
+        -79.5
+      ],
+      "max": [
+        79.5
+      ],
+      "scale": [
+        3.7020072358204086e-08
+      ],
+      "zero_point": [
+        0
+      ],
+      "ori_min": [
+        0.5
+      ],
+      "ori_max": [
+        79.5
+      ]
+    },
+    "/model.23/Constant_14_output_0": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int16",
+      "min": [
+        0.0
+      ],
+      "max": [
+        32.0
+      ],
+      "scale": [
+        0.0004882887006942855
+      ],
+      "zero_point": [
+        -32768
+      ],
+      "ori_min": [
+        8.0
+      ],
+      "ori_max": [
+        32.0
+      ]
+    },
+    "images_int8": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        0.0
+      ],
+      "max": [
+        1.0
+      ],
+      "scale": [
+        0.00392156862745098
+      ],
+      "zero_point": [
+        -128
+      ],
+      "ori_min": [
+        0.0
+      ],
+      "ori_max": [
+        1.0
+      ]
+    },
+    "output0_int8": {
+      "qtype": "asym",
+      "qmethod": "layer",
+      "dtype": "int8",
+      "min": [
+        -65.45033264160156
+      ],
+      "max": [
+        660.25634765625
+      ],
+      "scale": [
+        2.8459085501876533
+      ],
+      "zero_point": [
+        -105
+      ],
+      "ori_min": [
+        -65.45033264160156
+      ],
+      "ori_max": [
+        660.25634765625
+      ]
+    }
+  }
+}

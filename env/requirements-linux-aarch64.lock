@@ -1,0 +1,8 @@
+# Existing pip-owned packages only; CPython 3.12 / Linux aarch64.
+# Offline wheelhouse on this machine: /home/admin/rk3588-workspace/downloads/wheels
+# Conda owns packaging, setuptools and wheel; they are in the explicit Conda lock.
+numpy==2.5.4 --hash=sha256:fe4d21ab149f15e4e6043dfb0de87e6e5f34ac176cde83060e9802981fca2ac2
+opencv-python-headless==5.0.0.93 --hash=sha256:840bd717c21e5c11cadadc022a823315ea417f961213d06b4df010e019eb16f4
+psutil==7.2.2 --hash=sha256:b0726cecd84f9474419d67252add4ac0cd9811b04d61123054b9fb6f57df6e9e
+rknn-toolkit-lite2==2.5.0 --hash=sha256:5cea0e6ff6e52974debf21719b4499803b5ab62550107274e709846531bf53e1
+ruamel.yaml==0.19.1 --hash=sha256:27592957fedf6e0b62f281e96effd28043345e0e66001f97683aa9a40c667c93

@@ -1,0 +1,36 @@
+# Local development instructions, editor settings and credentials
+AGENTS.md
+AGENTS.override.md
+.agents/
+.codex/
+.vscode/
+.idea/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Native builds and Python caches
+build/
+build-*/
+cmake-build-*/
+CMakeUserPresets.json
+compile_commands.json
+__pycache__/
+*.py[cod]
+
+# Board-specific network provisioning, captures and experiment output
+/tools/rk-access/
+/test/archive/
+/test/camera/
+/test/results/
+/test/validation/
+/yolo_run.before-*.tar.gz
+/test/rknn_video_compare_*/video/
+/test/rknn_video_compare_*/gt/
+/test/rknn_video_compare_*/baseline/*.log
+/test/rknn_video_compare_*/baseline/*predictions.jsonl
+
+# Conversion-host artifacts; the board loads the RKNN files
+/yolo_model_rknn/*.onnx

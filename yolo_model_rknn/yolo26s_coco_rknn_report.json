@@ -1,0 +1,83 @@
+{
+  "target": "rk3588",
+  "toolkit": "2.5.0",
+  "source_sha256": "9a504be60793a0971aa0a1cd5d44b937bd91aa2816eb73befd763b93b383ed1a",
+  "calibration_count": 128,
+  "artifacts": {
+    "yolo26s_coco_fp16.rknn": {
+      "bytes": 22081306,
+      "sha256": "386cb69125156bc20bd5ee9dff75f7de472dfbed280b9a1d0bce94374f7cca45",
+      "smoke_simulation": {
+        "images": 3,
+        "raw_errors_vs_fp32": {
+          "boxes": {
+            "squared_error": 3833.812777388428,
+            "signal": 13933312241.111427,
+            "max_abs": 6.9270477294921875,
+            "elements": 100800,
+            "nmse": 2.7515444361294337e-07
+          },
+          "scores": {
+            "squared_error": 4.486011156856762e-05,
+            "signal": 5.241884471405392,
+            "max_abs": 0.00415647029876709,
+            "elements": 2016000,
+            "nmse": 8.55801225938508e-06
+          }
+        }
+      }
+    },
+    "yolo26s_coco_int8.rknn": {
+      "bytes": 12082689,
+      "sha256": "db181a50accc740a4c4e9b7349e14d594042df259be2fc81e37e69ba01d17eed",
+      "smoke_simulation": {
+        "images": 3,
+        "raw_errors_vs_fp32": {
+          "boxes": {
+            "squared_error": 23612244.953319427,
+            "signal": 13933312241.111427,
+            "max_abs": 408.0591125488281,
+            "elements": 100800,
+            "nmse": 0.001694661294078337
+          },
+          "scores": {
+            "squared_error": 1.1076460424088357,
+            "signal": 5.241884471405392,
+            "max_abs": 0.7172008752822876,
+            "elements": 2016000,
+            "nmse": 0.21130683983042206
+          }
+        }
+      }
+    },
+    "yolo26s_coco_fp16_int8.rknn": {
+      "bytes": 12142913,
+      "sha256": "bc5ad1150397ccaf8a25132c7b59d1bb07c8539f2acc9cf4bf088877dbd05e11",
+      "smoke_simulation": {
+        "images": 3,
+        "raw_errors_vs_fp32": {
+          "boxes": {
+            "squared_error": 23581669.745446593,
+            "signal": 13933312241.111427,
+            "max_abs": 408.0591125488281,
+            "elements": 100800,
+            "nmse": 0.0016924668978469356
+          },
+          "scores": {
+            "squared_error": 1.102306934292243,
+            "signal": 5.241884471405392,
+            "max_abs": 0.7172008752822876,
+            "elements": 2016000,
+            "nmse": 0.21028829236992044
+          }
+        }
+      }
+    }
+  },
+  "mixed_configuration": "yolo26s_coco_fp16_int8.quantization.json",
+  "limits": [
+    "Host simulator smoke checks only; no board accuracy or latency benchmark.",
+    "INT8 and mixed quantization are rebuilt by Toolkit2 from FP32, not transferred from ORT QDQ.",
+    "Split boxes/scores outputs require YOLO26 CPU TopK postprocessing."
+  ]
+}

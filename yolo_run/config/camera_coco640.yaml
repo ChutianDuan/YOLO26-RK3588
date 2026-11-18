@@ -1,0 +1,20 @@
+# YOLO26 one2one split outputs: boxes[1,4,8400], scores[1,80,8400].
+# Paths are relative to this config. Explicit --model overrides model_path.
+model_path: ../../yolo_model_rknn/yolo26s_coco_fp16.rknn
+labels_path: ../../yolo_model_rknn/yolo26s_coco_classes.json
+input_width: 640
+input_height: 640
+num_classes: 80
+conf_threshold: 0.25
+class_conf_thresholds: []
+preprocess: rga
+use_letterbox: true
+# 800x600 -> 640x480; RGB 114 padding: top=80, bottom=80.
+# RKNN supplies normalization (mean=0, std=255); application sends RGB UINT8.
+lk_preprocess: rga
+lk_scale: 1.0
+video_detect_fps: 0
+video_model_async: false
+video_stride_mode: dynamic
+opencv_threads: 2
+inference_timeout_ms: 1000
