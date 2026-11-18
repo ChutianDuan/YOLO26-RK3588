@@ -1,0 +1,45 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "rk3588-release",
+      "displayName": "RK3588 native C++17 Release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-rk3588",
+      "environment": {
+        "PATH": "/usr/bin:/bin",
+        "CMAKE_PREFIX_PATH": null,
+        "CMAKE_TOOLCHAIN_FILE": null,
+        "PKG_CONFIG_PATH": null,
+        "PKG_CONFIG_LIBDIR": null,
+        "LD_LIBRARY_PATH": null,
+        "LD_PRELOAD": null,
+        "CPATH": null,
+        "CPLUS_INCLUDE_PATH": null,
+        "LIBRARY_PATH": null,
+        "CC": null,
+        "CXX": null,
+        "CXXFLAGS": null,
+        "LDFLAGS": null
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CXX_COMPILER": "/usr/bin/g++",
+        "CMAKE_MAKE_PROGRAM": "/usr/bin/ninja",
+        "CMAKE_TOOLCHAIN_FILE": ""
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "rk3588-release",
+      "configurePreset": "rk3588-release",
+      "jobs": 4
+    }
+  ]
+}

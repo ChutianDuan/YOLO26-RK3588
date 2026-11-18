@@ -1,0 +1,49 @@
+%% camera_live 已启动后的关闭流程；不是 yolo_multi 的 EOF/调度协议。
+%% 依据：live_pipeline.cpp:194-198,218-225,280-314,385-420；live_media.h:48-76。
+%% 设备异常策略：live_media.cpp:106-115,311-315,342-347,395-416；
+%% yolo_engine.cpp:24-53,148-168；stream_output.cpp:134-148,218-222,305-348。
+flowchart TD
+    EOF["正常输入 EOF"] --> PF["采集线程 packets.finish<br/>保留最后等待包，唤醒解码"]
+    PF --> DF["解码线程结束：infer_frames / output_frames.finish<br/>保留各自最后等待帧"]
+    DF --> OUT["main 消费输出至 output_frames.finished"]
+    OUT --> STOP
+    ACTIVE["主动停止<br/>SIGINT / 窗口关闭 / 帧数上限"] --> STOP
+    APPERR["可安全收尾的应用异常<br/>各线程或 main 捕获 std::exception"] --> FAIL["fail：记录首个错误"]
+    FAIL --> STOP
+
+    STOP["stopNewWork：atomic stop = true<br/>packets / infer_frames / output_frames.close<br/>舍弃等待项并 notify_all；不撤销在途硬件任务"]
+    STOP --> CJ["capture_thread.join"]
+    CJ --> DJ["decode_thread.join"]
+    DJ --> WJ["全部 Worker.join<br/>已开始任务按完成条件收尾"]
+    WJ --> RF["results.finish：保留已排队结果并唤醒<br/>最后一个 Worker 也会调用此幂等操作"]
+    RF --> TJ["correction_thread.join<br/>正常消费剩余结果；自身异常则退出"]
+    TJ --> RENDER["stabilizer.finish、renderer.finish<br/>结束灰度参考与 BGR 的 CPU 访问"]
+    RENDER --> STREAM["可选 stream.stop<br/>enabled=false，pending.close / notify<br/>等待编码 Worker 退出"]
+    STREAM --> SUMMARY["可选 destroyAllWindows<br/>采集统计并生成 summary"]
+    SUMMARY --> ERROR{"summary 为 error？"}
+    ERROR -->|否| WRITE["writer.push summary → writer.finish<br/>排空记录并 join 写线程"]
+    ERROR -->|是| CANCEL["writer.cancelPending → writer.finish<br/>不保证 JSONL 留有最终 summary"]
+    WRITE --> RETURN["return summary<br/>局部对象执行 RAII 析构"]
+    CANCEL --> RETURN
+    RETURN --> CLEAN["仅对已确认安全的资源清理<br/>RKNN 注册 → Context → 底层分配<br/>MPP 停止/销毁 → 撤注册 → 底层分配"]
+    CLEAN --> SOURCE["调用方随后析构源对象<br/>摄像头 STREAMOFF 成功后 unmap / close"]
+
+    subgraph UNSAFE["设备完成无法确认：独立策略"]
+        UNCERTAIN["RGA / MJPEG 完成不明<br/>或 RKNN 等待/SDK 清理失败"] --> TERMINATE["std::terminate<br/>不继续用户态普通释放"]
+        ENCFAIL["H.264 编码清理中<br/>reset / destroy 无法确认停止"] --> QUARANTINE["隔离整个编码 Impl 到进程退出<br/>保留注册、active 租约与固定 DMA<br/>这些对象不进入普通释放"]
+    end
+    HW["独立触发：执行中的 RGA / MJPEG<br/>无法确认完成"] --> UNCERTAIN
+    RETURN -. "RAII 中等待或清理失败" .-> UNCERTAIN
+    SOURCE -. "STREAMOFF 失败" .-> TERMINATE
+    STREAM -. "编码析构中的停止确认失败" .-> ENCFAIL
+
+    %% EOF 的 finish 与统一收尾 close 不同：main 输出结束后仍会执行 stopNewWork。
+    %% 因而尚未开始的推理等待项可能被 close 舍弃，不能宣称所有源帧检测全部排空。
+    %% 线程内 fail 可能先调用 stopNewWork，main 收尾再次调用；close/finish 可重复。
+    %% results.finish 不撤销已取出的结果；track 自身异常时无法承诺排空所有结果。
+    %% 编码异常通常仅禁用推流，不调用全局 fail；隔离对象不妨碍其他安全对象收尾。
+    %% RKNN 失败后的 active_input 可一直保留到析构 rknn_wait，不能在 join 后直接复用。
+    %% 图中 join / fwrite / fflush 没有硬时限；入队 250 ms 超时不等于退出时限。
+    %% writer 收尾抛异常会被记录为 error 后返回，析构仍会 finish/join；不保证最终 summary。
+    %% CLEAN 表达各 SDK 内部的安全释放约束，不表示全工程只有一个全局释放顺序。
+    %% source 属于调用方，runLive 只借用；采集线程 join 不等于摄像头已 STREAMOFF。

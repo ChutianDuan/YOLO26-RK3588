@@ -1,0 +1,70 @@
+flowchart TB
+    %% yolo_multi 当前实现：4 路时 12 个应用线程（不含 SDK / OpenCV 内部线程）。
+    %% 来源：multi_video.cpp、fair_scheduler.h；各通道 ID 与 Worker ID 分别管理。
+
+    subgraph DECODE["4 路本地文件：各 1 个解码线程"]
+        direction LR
+        D0["解码线程 0<br/>OpenCV / FFmpeg CPU 解码<br/>本路 6 槽 BGR 帧池"]
+        D1["解码线程 1<br/>OpenCV / FFmpeg CPU 解码<br/>本路 6 槽 BGR 帧池"]
+        D2["解码线程 2<br/>OpenCV / FFmpeg CPU 解码<br/>本路 6 槽 BGR 帧池"]
+        D3["解码线程 3<br/>OpenCV / FFmpeg CPU 解码<br/>本路 6 槽 BGR 帧池"]
+    end
+
+    S["FairScheduler：共享调度器，非线程<br/>mutex + condition_variable<br/>按通道轮询，成功派发后推进游标<br/>每路最多 1 个最新等待项 + 1 个在途任务"]
+    L["各通道 latest 图像槽（共 4 个）<br/>解码线程发布，本路 mutex 保护<br/>检测与输出持有只读 BGR 租约；无空闲槽则丢帧"]
+    D0 --> S
+    D1 --> S
+    D2 --> S
+    D3 --> S
+    D0 --> L
+    D1 --> L
+    D2 --> L
+    D3 --> L
+
+    subgraph INFER["3 个共享推理 Worker：领取任一可调度通道的任务"]
+        direction LR
+        W0["Worker 0 / NPU Core0<br/>独占 Context、预处理器、RGB DMA-BUF<br/>BGR 上传 → 同步 RGA → 阻塞 RKNN"]
+        W1["Worker 1 / NPU Core1<br/>独占 Context、预处理器、RGB DMA-BUF<br/>BGR 上传 → 同步 RGA → 阻塞 RKNN"]
+        W2["Worker 2 / NPU Core2<br/>独占 Context、预处理器、RGB DMA-BUF<br/>BGR 上传 → 同步 RGA → 阻塞 RKNN"]
+    end
+    S --> W0
+    S --> W1
+    S --> W2
+
+    C["4 份独立通道状态（数据，非线程）<br/>Worker 按 task.channel 更新该路 ByteTracker<br/>本路 mutex 保护：Tracker、水位、快照历史 ≤ 64、检测事件 ≤ 64<br/>完成更新与事件发布后 scheduler.complete(channel)<br/>没有单独 Track 线程；Worker ID 不等于 channel_id"]
+    W0 --> C
+    W1 --> C
+    W2 --> C
+
+    subgraph OUTPUT["每路 1 个输出线程：共 4 个"]
+        direction LR
+        O0["输出线程 0<br/>读本路图像与历史快照<br/>锁外 Kalman 预测、画框<br/>JSONL / 可选 MJPG AVI"]
+        O1["输出线程 1<br/>读本路图像与历史快照<br/>锁外 Kalman 预测、画框<br/>JSONL / 可选 MJPG AVI"]
+        O2["输出线程 2<br/>读本路图像与历史快照<br/>锁外 Kalman 预测、画框<br/>JSONL / 可选 MJPG AVI"]
+        O3["输出线程 3<br/>读本路图像与历史快照<br/>锁外 Kalman 预测、画框<br/>JSONL / 可选 MJPG AVI"]
+    end
+    L --> O0
+    L --> O1
+    L --> O2
+    L --> O3
+    C -. "复制本路快照 / 取走事件" .-> O0
+    C -. "复制本路快照 / 取走事件" .-> O1
+    C -. "复制本路快照 / 取走事件" .-> O2
+    C -. "复制本路快照 / 取走事件" .-> O3
+
+    M["main 调用线程<br/>可选四宫格预览 / HighGUI<br/>资源采样与 resources.jsonl<br/>信号、时长限制、统一停止与 join"]
+    O0 -. "预览副本" .-> M
+    O1 -. "预览副本" .-> M
+    O2 -. "预览副本" .-> M
+    O3 -. "预览副本" .-> M
+    C -. "读取各通道统计" .-> M
+
+    N["读图边界<br/>4 路时：4 解码 + 3 Worker + 4 输出 + 1 main = 12 个应用线程<br/>录制与本路 JSONL 均在输出线程内；没有额外录像或日志线程<br/>快照源时间不晚于画面时间，预测不回写 Tracker<br/>当前仅本地文件软件解码；该图不表示 RTSP 输入或 MPP 解码"]
+    M --- N
+
+    classDef thread fill:#e8f1ff,stroke:#3868a8,color:#153052,stroke-width:1.5px;
+    classDef state fill:#fff4de,stroke:#b7812a,color:#553b17,stroke-width:1.5px;
+    classDef note fill:#f3f5f7,stroke:#98a2b3,color:#344054,stroke-dasharray:5 4;
+    class D0,D1,D2,D3,W0,W1,W2,O0,O1,O2,O3,M thread;
+    class S,L,C state;
+    class N note;

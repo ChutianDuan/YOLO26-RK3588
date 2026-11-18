@@ -1,0 +1,176 @@
+{
+  "source_sha256": "fbed9c0b25fa4c79e2862ab16931e59ddff062c6afd1a7dfa13129a5fe25ba2a",
+  "target": "rk3588",
+  "toolkit": "2.5.0",
+  "output_shape": [
+    1,
+    300,
+    6
+  ],
+  "output_columns": [
+    "x1",
+    "y1",
+    "x2",
+    "y2",
+    "score",
+    "class_id"
+  ],
+  "preserves_original_one2one_topk_graph": true,
+  "topk_execution": "CPU inside RKNN runtime, per compiler placement",
+  "external_topk_required": false,
+  "calibration_images": 128,
+  "models": {
+    "fp16": {
+      "sha256": "212d3e2f322e5d6f8ba3a386644882849056bdd5f18f8f3a3989796d1ccd5e6b",
+      "simulation": [
+        {
+          "image": "/home/ubuntu/YOLO/model/data/coco128/images/train2017/000000000009.jpg",
+          "shape": [
+            1,
+            300,
+            6
+          ],
+          "dtype": "float32",
+          "detections_conf_025": 5,
+          "reference_detections_conf_025": 5
+        },
+        {
+          "image": "/home/ubuntu/YOLO/model/data/coco128/images/train2017/000000000025.jpg",
+          "shape": [
+            1,
+            300,
+            6
+          ],
+          "dtype": "float32",
+          "detections_conf_025": 2,
+          "reference_detections_conf_025": 2
+        },
+        {
+          "image": "/home/ubuntu/YOLO/model/data/coco128/images/train2017/000000000030.jpg",
+          "shape": [
+            1,
+            300,
+            6
+          ],
+          "dtype": "float32",
+          "detections_conf_025": 1,
+          "reference_detections_conf_025": 1
+        }
+      ],
+      "filename": "yolo26s_coco_e2e_fp16.rknn",
+      "bytes": 22214004
+    },
+    "int8": {
+      "sha256": "48888898144d2caffc9f6bd7bdd5153b36fd9981c7daf7b76131c135cd501466",
+      "simulation": [
+        {
+          "image": "/home/ubuntu/YOLO/model/data/coco128/images/train2017/000000000009.jpg",
+          "shape": [
+            1,
+            300,
+            6
+          ],
+          "dtype": "float32",
+          "detections_conf_025": 5,
+          "reference_detections_conf_025": 5
+        },
+        {
+          "image": "/home/ubuntu/YOLO/model/data/coco128/images/train2017/000000000025.jpg",
+          "shape": [
+            1,
+            300,
+            6
+          ],
+          "dtype": "float32",
+          "detections_conf_025": 3,
+          "reference_detections_conf_025": 2
+        },
+        {
+          "image": "/home/ubuntu/YOLO/model/data/coco128/images/train2017/000000000030.jpg",
+          "shape": [
+            1,
+            300,
+            6
+          ],
+          "dtype": "float32",
+          "detections_conf_025": 1,
+          "reference_detections_conf_025": 1
+        }
+      ],
+      "filename": "yolo26s_coco_e2e_int8.rknn",
+      "bytes": 12224961,
+      "compiler_conv_kernels_by_dtype": {
+        "INT8": 105
+      },
+      "compiler_topk": {
+        "/model.23/TopK": {
+          "dtype": "FLOAT16",
+          "target": "CPU"
+        },
+        "/model.23/TopK_1": {
+          "dtype": "FLOAT16",
+          "target": "CPU"
+        }
+      }
+    },
+    "fp16_int8": {
+      "sha256": "720457f6428048c6f614300ab3d86ff31323175c456c39680bd99e818a6bb954",
+      "simulation": [
+        {
+          "image": "/home/ubuntu/YOLO/model/data/coco128/images/train2017/000000000009.jpg",
+          "shape": [
+            1,
+            300,
+            6
+          ],
+          "dtype": "float32",
+          "detections_conf_025": 5,
+          "reference_detections_conf_025": 5
+        },
+        {
+          "image": "/home/ubuntu/YOLO/model/data/coco128/images/train2017/000000000025.jpg",
+          "shape": [
+            1,
+            300,
+            6
+          ],
+          "dtype": "float32",
+          "detections_conf_025": 3,
+          "reference_detections_conf_025": 2
+        },
+        {
+          "image": "/home/ubuntu/YOLO/model/data/coco128/images/train2017/000000000030.jpg",
+          "shape": [
+            1,
+            300,
+            6
+          ],
+          "dtype": "float32",
+          "detections_conf_025": 1,
+          "reference_detections_conf_025": 1
+        }
+      ],
+      "filename": "yolo26s_coco_e2e_fp16_int8.rknn",
+      "bytes": 12261121,
+      "compiler_conv_kernels_by_dtype": {
+        "INT8": 99,
+        "FLOAT16": 6
+      },
+      "compiler_topk": {
+        "/model.23/TopK": {
+          "dtype": "FLOAT16",
+          "target": "CPU"
+        },
+        "/model.23/TopK_1": {
+          "dtype": "FLOAT16",
+          "target": "CPU"
+        }
+      }
+    }
+  },
+  "output_precision_policy": "decoded boxes, scores, TopK and final assembly retained in FP16; convolutional body INT8, with six extra FP16 terminal heads for the mixed variant",
+  "limits": [
+    "Host simulator verified; board accuracy/performance remain unverified.",
+    "A single RKNN graph includes both NPU and CPU operators."
+  ]
+}

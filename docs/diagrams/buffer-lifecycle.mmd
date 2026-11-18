@@ -1,0 +1,56 @@
+%% camera_live / MPP MJPEG 路径；示意一帧同时被推理与输出接收的正常情况。
+%% 依据：live_pipeline.cpp:183-187,260-299,330-360；live_media.cpp:154-209,319-365,384-421。
+%% RKNN：yolo_engine.cpp:216-252；编码：stream_output.cpp:65-83,150-211,305-348。
+%% P/S/I/B/E 是不同 allocation；队列只交接描述与所有权，不复制这些像素。
+sequenceDiagram
+    autonumber
+    participant C as 采集线程 / V4L2 DMA-BUF
+    participant P as P：JPEG 压缩包池 / 8 槽
+    participant D as 解码线程 / MPP
+    participant S as S：解码 NV12 池 / 8 槽
+    participant W as Worker i / 独占 RGB I
+    participant B as main / 独立 BGR B 双槽
+    participant E as E：编码 NV12 池 / 3 槽
+    participant H as 编码 Worker / MPP H.264
+
+    C->>P: 取出已采集 P；仅包尾清零与 Cache Sync
+    C->>C: 换入另一空闲 P，QBUF 归还队列槽
+    C->>D: packets 最新槽移交 P 的 owner
+    D->>S: 选择无外部消费者持有的 Surface
+    D->>D: decode_put_packet(P) → decode_get_frame(S)
+    Note over D,S: 确认 MPP 完成，并核验输入包/输出帧身份、PTS、格式和 stride
+    D->>P: decode 返回后 packet.reset，归还本帧 P 占用
+    D->>D: 两槽 320×240 灰度 + CPU LK/EMA，固定本帧 ROI
+    D-->>W: infer_frames：S 只读 owner，只交给一个 Worker
+    D-->>B: output_frames：同一 S 的另一份只读 owner
+
+    par 推理分支
+        W->>W: 同步 RGA：读取 S 的 ROI → 写独立 RGB I / letterbox
+        W->>S: IM_SYNC 成功后 frame.reset，归还推理侧 S
+        W->>W: TensorInput + engine.active_input 持有 I 的帧租约
+        W->>W: 绑定 I 的 FD → 阻塞 rknn_run → outputs_get
+        W->>W: 后处理 → outputs_release → 清除 active_input
+        W->>W: 发布数值结果；循环结束释放局部 TensorInput
+        Note over W: I 的最后帧租约释放后才能写下一帧<br/>RKNN 注册缓存仍可持有 allocation，不等于占用当前帧
+    and 输出分支
+        B->>B: 同步 RGA：读取 S 的 ROI → 写独立 BGR B
+        B->>S: IM_SYNC 成功后 frame.reset，归还输出侧 S
+        B->>B: CPU RW START → 画框/同步预览调用 → renderer.finish / END
+        Note over B: Mat 只是 B 的借用视图；不能交异步消费者后立即复用<br/>finish 不证明显示后端扫描呈现已经完成
+        opt 开启推流且有空闲 E
+            B->>E: acquire 独立帧租约
+            B->>B: 同步 RGA：读取当前 B → 写 E / BT.601 limited
+            B->>H: IM_SYNC 成功后 pending 最新槽移交 E owner
+            H->>H: active 持有 E；提交编码
+            H->>H: 逐包 CPU READ START/END；收齐非分片包或分片 EOI
+            H->>H: 确认输入读取结束，清除 active
+            H->>H: MPEG-TS 封装 → 非阻塞 UDP 发送
+            H->>E: 本轮 StreamFrame 释放，最后租约归还后可复用 E
+        end
+    end
+    Note over D,S: 两路 S owner 都归还后，S 才可被下一次解码覆盖<br/>这可早于 I 的 NPU 推理或 E 的编码结束
+    Note over P,H: owner 防止提前复用；allocation 保持 FD/mmap 存活；设备完成另行确认<br/>shared_ptr / Cache Sync / mutex 都不能替代设备完成；采集无应用层 JPEG 复制；仍有颜色转换与 CPU 访问
+    %% latest 替换/close 只释放等待项的 owner，不影响已取走的在途帧。
+    %% RGB I 用独立 FrameLease 的 weak_ptr 判断帧占用；S/P 用池槽包装引用判断空闲。
+    %% EOI 后外层 StreamFrame 仍持有 E，直到本轮写出结束；绑定缓存仅持 allocation。
+    %% 异常时租约可继续保留；设备完成无法确认的终止/隔离路径另见 shutdown.mmd。

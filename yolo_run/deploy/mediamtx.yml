@@ -1,0 +1,44 @@
+# Independent MediaMTX v1.21.2. Run manually; no system service is installed.
+# Set MTX_WEBRTCADDITIONALHOSTS to the board's LAN address when launching.
+logLevel: info
+logStructured: true
+logDestinations: [stdout]
+readTimeout: 10s
+writeTimeout: 5s
+writeQueueSize: 128
+authMethod: internal
+authInternalUsers:
+  - user: any
+    ips: [127.0.0.1, '::1']
+    permissions:
+      - action: publish
+        path: camera1
+  - user: any
+    ips: []
+    permissions:
+      - action: read
+        path: camera1
+api: false
+metrics: false
+pprof: false
+playback: false
+rtsp: true
+rtspAddress: :8554
+rtspTransports: [tcp]
+rtmp: false
+hls: false
+webrtc: true
+webrtcAddress: :8889
+webrtcLocalUDPAddress: :8189
+webrtcLocalTCPAddress: ''
+webrtcIPsFromInterfaces: true
+webrtcAdditionalHosts: []
+webrtcICEServers2: []
+srt: false
+moq: false
+pathDefaults:
+  source: publisher
+  record: false
+  overridePublisher: false
+paths:
+  camera1:

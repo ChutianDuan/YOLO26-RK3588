@@ -1,0 +1,75 @@
+%% camera_live: 默认 split + MPP 路径；推流默认关闭，虚线表示可选推流或快照读取。
+%% 实线表示帧/结果交接，不表示所有阶段在同一线程，或硬件任务异步提交。
+%% Sources: camera/live_pipeline.cpp:164-208,227-380; camera/live_media.h:48-76;
+%%          camera/live_media.cpp:104-231,295-365; camera/stream_output.cpp:65-83,295-356.
+flowchart LR
+    subgraph INPUT["采集与解码"]
+        direction LR
+        USB["USB 摄像头<br/>800×600 MJPEG"]
+        CAP["capture 线程<br/>8 块输入 DMA-BUF / 4 个 V4L2 槽<br/>DQBUF 后换入空闲缓冲并 QBUF"]
+        PACKET["packets · latest 等待槽<br/>容量 1；新项替换旧等待项"]
+        DEC["decode 线程<br/>独占 MPP MJPEG 解码器<br/>固定 8 槽 NV12 Surface 池<br/>两槽小图 + CPU LK/EMA，固定本帧 ROI"]
+        USB --> CAP --> PACKET --> DEC
+    end
+
+    subgraph DETECT["检测分支：3 个固定 Worker"]
+        direction TB
+        INFER["infer_frames · latest 等待槽<br/>容量 1；三个 Worker 竞争 take<br/>一帧只交给一个 Worker"]
+        W0["Worker 0<br/>独占预处理器 / RGB 缓冲 / Engine / Context<br/>同步 RGA ROI → 阻塞 RKNN → 后处理<br/>NPU Core0 · mask 1"]
+        W1["Worker 1<br/>独占预处理器 / RGB 缓冲 / Engine / Context<br/>同步 RGA ROI → 阻塞 RKNN → 后处理<br/>NPU Core1 · mask 2"]
+        W2["Worker 2<br/>独占预处理器 / RGB 缓冲 / Engine / Context<br/>同步 RGA ROI → 阻塞 RKNN → 后处理<br/>NPU Core2 · mask 4"]
+        RESULTS["results · 检测结果 FIFO<br/>容量 3；包含帧序号与源时间<br/>满 250 ms 报错停止流水线"]
+        INFER --> W0 --> RESULTS
+        INFER --> W1 --> RESULTS
+        INFER --> W2 --> RESULTS
+    end
+
+    subgraph TRACKING["跟踪校正"]
+        direction TB
+        TRACK["track / correction 线程<br/>唯一可变 ByteTracker，统一分配 ID<br/>当前已完成批次排序；水位拒绝迟到结果"]
+        SNAP["snapshots · 历史快照<br/>最多 64 份；snapshot_mutex 保护发布与拷贝<br/>发布后不再修改其中的轨迹状态"]
+        TRACK --> SNAP
+    end
+
+    subgraph DISPLAY["输出分支：与检测独立消费"]
+        direction TB
+        OUT["output_frames · latest 等待槽<br/>容量 1；新项替换旧等待项"]
+        MAIN["main 调用线程：不等待本帧检测<br/>选择不晚于本图源时间的快照并拷贝<br/>同步 RGA ROI → 独立 BGR 双缓冲<br/>预测到本图时间 → 画框 / 可选预览<br/>finish 结束 CPU 访问"]
+        OUT --> MAIN
+    end
+
+    subgraph LOGGING["有界日志输出"]
+        direction TB
+        JSONQ["JSONL FIFO<br/>容量 64；满 250 ms 报错<br/>只保存记录，不保留图像租约"]
+        WRITER["writer 线程<br/>顺序写入并刷新 JSONL"]
+        FILE["新建的结果文件"]
+        JSONQ --> WRITER --> FILE
+    end
+
+    subgraph STREAM["可选推流：仅 --stream on 时创建"]
+        direction TB
+        CONVERT["main 内同步 RGA 转换<br/>BGR → 编码池独立 NV12<br/>固定 3 槽；无空闲槽则跳过本次提交"]
+        ENCQUEUE["编码 latest 等待槽<br/>容量 1；新项替换旧等待项"]
+        ENCODER["encoder 线程<br/>独占 MPP H.264 编码器<br/>输入租约至少持有到收齐 EOI<br/>MPEG-TS / 非阻塞本机 UDP"]
+        EXTERNAL["外部进程：FFmpeg stream copy → MediaMTX<br/>RTSP / WebRTC 输出"]
+        CONVERT --> ENCQUEUE --> ENCODER --> EXTERNAL
+    end
+
+    DEC -->|"只复制描述与共享租约；可按 detect_fps 限频"| INFER
+    DEC -->|"同一 NV12 的另一份只读租约"| OUT
+    RESULTS --> TRACK
+    SNAP -.->|"短锁内拷贝，锁外预测；不共享可变 Tracker"| MAIN
+    TRACK -->|"detection 记录"| JSONQ
+    MAIN -->|"frame / resource；启动与收尾另写 metadata / summary"| JSONQ
+    MAIN -.->|"绘制与 finish 完成后；本步骤仍由 main 执行"| CONVERT
+
+    classDef thread fill:#e8f1ff,stroke:#315b92,color:#172b4d;
+    classDef queue fill:#fff4d6,stroke:#947335,color:#493b18;
+    classDef snapshot fill:#e6f4eb,stroke:#417c59,color:#1f492f;
+    classDef external fill:#f1f3f5,stroke:#6b7280,color:#27303d;
+    classDef optional fill:#f3edff,stroke:#7956a1,color:#432b5d;
+    class CAP,DEC,W0,W1,W2,TRACK,MAIN,WRITER thread;
+    class PACKET,INFER,RESULTS,OUT,JSONQ,ENCQUEUE queue;
+    class SNAP snapshot;
+    class USB,FILE,EXTERNAL external;
+    class CONVERT,ENCODER optional;

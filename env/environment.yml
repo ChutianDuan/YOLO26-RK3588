@@ -1,0 +1,12 @@
+# Current intent for the existing ARM64 vision Python role.
+# Exact recreation: conda-linux-aarch64.explicit.lock, then the hashed pip lock.
+# This file defines the Conda layer only; do not use historical pip freeze output.
+name: rk3588-infer
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12.15
+  - pip=26.2.1
+  - packaging=26.3
+  - setuptools=84.0.0
+  - wheel=0.48.0

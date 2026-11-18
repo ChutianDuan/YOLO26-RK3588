@@ -1,0 +1,20 @@
+# Paths are relative to this config file. CLI --model is relative to the working directory.
+model_path: ../yolo_model_rknn/yolo26s_800x608_fp16.rknn
+labels_path: deploy/classes.json
+input_width: 800
+input_height: 608
+num_classes: 10
+conf_threshold: 0.25
+# ID order; -1 inherits conf_threshold.
+class_conf_thresholds: []
+preprocess: rga
+use_letterbox: true
+# LK reads reusable RGA grayscale DMA-BUFs. 1 preserves source resolution.
+lk_preprocess: rga
+lk_scale: 1.0
+# 0 detects every frame. Otherwise LK fills frames between detections.
+video_detect_fps: 4.0
+video_model_async: true
+video_stride_mode: dynamic
+opencv_threads: 2
+inference_timeout_ms: 1000

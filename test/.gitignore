@@ -1,0 +1,4 @@
+/build-rk3588/
+/results/
+/archive/build-before-cleanup-*/
+__pycache__/

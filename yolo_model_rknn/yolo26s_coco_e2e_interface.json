@@ -1,0 +1,52 @@
+{
+  "target": "rk3588",
+  "runtime": "2.5.0",
+  "input": {
+    "shape": [
+      1,
+      640,
+      640,
+      3
+    ],
+    "dtype": "uint8",
+    "format": "NHWC",
+    "color": "RGB",
+    "padding": 114,
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "std": [
+      255,
+      255,
+      255
+    ],
+    "pass_through": 0
+  },
+  "output": {
+    "shape": [
+      1,
+      300,
+      6
+    ],
+    "columns": [
+      "x1",
+      "y1",
+      "x2",
+      "y2",
+      "score",
+      "class_id"
+    ],
+    "want_float": 1,
+    "coordinates": "padded 640x640 pixels"
+  },
+  "external_topk": false,
+  "external_nms": false,
+  "remaining_application_operations": [
+    "confidence threshold",
+    "reverse letterboxing"
+  ],
+  "topk_placement": "CPU inside RKNN runtime (compiler placement)",
+  "class_names": "yolo26s_coco_e2e_classes.json"
+}

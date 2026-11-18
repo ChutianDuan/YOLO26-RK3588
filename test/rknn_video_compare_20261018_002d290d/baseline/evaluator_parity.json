@@ -1,0 +1,7 @@
+{
+  "reference": "model.ptq_analysis.quality",
+  "same_map50": true,
+  "same_map50_95": true,
+  "same_operating_point": true,
+  "same_per_class_ap": true
+}

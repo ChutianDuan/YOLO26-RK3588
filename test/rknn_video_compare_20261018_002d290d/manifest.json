@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-10-18T08:03:38.695064+08:00",
+  "dataset": {
+    "name": "BDD100K MOT",
+    "split": "train",
+    "video_name": "002d290d-90f2bab2",
+    "selection_reason": "Existing verified sequence with many person annotations; backend comparison only, not an independent generalization test."
+  },
+  "video": {
+    "path": "video/002d290d-90f2bab2.mov",
+    "file_size_bytes": 19714756,
+    "sha256": "adea3374f6098607418006a6970b5e2bbb9dd84aecd94eaad7ffe6bb8a746912",
+    "decoded_frame_count": 1210,
+    "width": 1280,
+    "height": 720,
+    "fps": 30.10699178900224,
+    "coded_width": 720,
+    "coded_height": 1280,
+    "rotation_degrees": 90,
+    "width_height_convention": "Decoded display orientation after honoring MOV rotation metadata"
+  },
+  "ground_truth": {
+    "path": "gt/002d290d-90f2bab2.json",
+    "sha256": "f270fc340d9dd3ecc78ecd907129c705d3204fcfccbb46428ed8e3e31df4f0d1",
+    "source_manifest_sha256": "440445424dbd9b743844e15b54f46943ec0182e4d27f7bf02770042c22b446ba",
+    "source_label_csv_sha256": "59adc72b1ca03d3de6951db14cb69363223d27c32bd2ec633e80d640bf806e33",
+    "label_index_to_source_frame_stride": 6,
+    "labeled_frames": 202,
+    "skipped_tail_label_indices": [
+      202
+    ]
+  },
+  "classes": [
+    "person",
+    "rider",
+    "car",
+    "truck",
+    "bus",
+    "train",
+    "motor",
+    "bike",
+    "traffic light",
+    "traffic sign"
+  ],
+  "annotated_class_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "model": {
+    "fp32_onnx_sha256": "4e8404d9135d22a369dd0c3009dbeee3236fa4e06e0468df562791cd329459f1",
+    "source_pt_sha256": "be9daca79cb1041fee876d0b196401f9bbe2c81c664be630578020cfc059d0fd",
+    "local_fp32_onnx": "/home/ubuntu/YOLO/model/runs/detect/bdd100k_yolo26s_800x608_person_20261017_155242/export/fp32.onnx",
+    "input_shape": [
+      1,
+      3,
+      608,
+      800
+    ],
+    "output_shapes": {
+      "boxes": [
+        1,
+        4,
+        9975
+      ],
+      "scores": [
+        1,
+        10,
+        9975
+      ]
+    }
+  },
+  "rknn": {
+    "fp16": {
+      "path": "/home/yolo/yolo_model_rknn/yolo26s_800x608_fp16.rknn",
+      "sha256": "f04b1c2818d1d6bc7f8f129780ce021dedf66e891c3ddb6cbb0273e3b9244187"
+    },
+    "int8": {
+      "path": "/home/yolo/yolo_model_rknn/yolo26s_800x608_int8.rknn",
+      "sha256": "519648ba11461706826f4200e9a4ff27f5e760fcc7e3b7494e11481e352a5303"
+    }
+  },
+  "evaluation": {
+    "candidate_score_floor": 0.001,
+    "operating_confidence": 0.25,
+    "operating_iou": 0.5,
+    "ap_iou_thresholds": [
+      0.5,
+      0.55,
+      0.6,
+      0.65,
+      0.7,
+      0.75,
+      0.8,
+      0.85,
+      0.9,
+      0.95
+    ],
+    "ap_interpolation_points": 101,
+    "max_detections": 300,
+    "nms": false,
+    "prediction_field": "detections",
+    "frame_indices": "zero-based decoded source frame indices",
+    "coverage": "Only annotated frames; supported MOT classes 0..7. AP averages only classes with nonzero ground truth."
+  },
+  "remote_directory": "/home/yolo/test/rknn_video_compare_20261018_002d290d",
+  "provenance": {
+    "copied_helpers": {
+      "yolo26_deploy.py": "38a69305fc8af3051bd650d3329a20de907fc77ce910e6d70f27f404b757c473",
+      "evaluate_bdd100k_tracking.py": "40746d7d033fdb9a801a3029d72880ec7ccf0fdf571a3750eeb76134e9d099ed"
+    }
+  }
+}
