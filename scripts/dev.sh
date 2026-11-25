@@ -17,8 +17,8 @@ Usage: bash scripts/dev.sh [--role system|vision] shell
 
 Default Python/shell role: vision (existing rk3588-infer environment).
 system uses /usr/bin/python3. doctor always checks both roles.
-build uses the existing native production preset; test builds the test preset
-and runs the CPU-only regressions selected by the cpu CTest label.
+build uses the native production preset. test requires the board-local test
+suite and runs the CPU-only regressions selected by the cpu CTest label.
 No command installs or upgrades packages.
 Exit the project shell with exit. --role is valid only for shell/python.
 EOF
@@ -66,6 +66,7 @@ case "$COMMAND" in
         if [[ $COMMAND == build ]]; then
             cd -- "$ROOT/yolo_run"
         else
+            [[ -f "$ROOT/test/CMakeLists.txt" ]] || fail 'test requires the board-local test suite, which is excluded from the public repository'
             cd -- "$ROOT/test"
         fi
         native /usr/bin/cmake --preset rk3588-release

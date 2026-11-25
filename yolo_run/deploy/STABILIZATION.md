@@ -4,10 +4,11 @@
 
 ```bash
 bash /home/yolo/scripts/dev.sh build
+out=$(mktemp -d)
 /home/yolo/yolo_run/build-rk3588/camera_live \
   --config /home/yolo/yolo_run/config/camera_coco640.yaml \
   --preview off --stabilize on --stabilize-alpha 0.15 \
-  --max-frames 3000 --output /tmp/stabilization-NEW.jsonl
+  --max-frames 3000 --output "$out/live.jsonl"
 ```
 
 输出文件必须不存在。`--stabilize off` 使用完整原图；`--stabilize-alpha 1` 使用固定中心裁剪，适合隔离缩放与防抖的影响。α 必须在 `(0,1]`；默认 0.15，以 30 FPS 为参考，实际按帧时间间隔换算。
@@ -47,17 +48,10 @@ RKNN letterbox 及后处理对应这个 800×600 虚拟画布；预览、推流�
 
 ## 验证
 
+运行页首摄像头命令后，可读取这一轮的统计：
+
 ```bash
-bash /home/yolo/scripts/dev.sh test
-ctest --test-dir /home/yolo/test/build-rk3588 --output-on-failure -j1
-# 下面两个目录必须是新目录；需要独占摄像头/MPP/RGA/NPU。
-/home/yolo/test/build-rk3588/bin/stabilization_test --artifacts /tmp/stabilization-demo-NEW
-/usr/bin/python3 /home/yolo/test/tools/benchmark_dma_capture.py \
-  --compare-stabilization --output-dir /tmp/stabilization-benchmark-NEW
+tail -n 1 "$out/live.jsonl" | /usr/bin/python3 -c 'import json,sys; s=json.load(sys.stdin); print(s["status"], s["frame_count"], s["inference_count"], s["stabilization"])'
 ```
 
-`stabilization_core` 验证平移、背景掩码、EMA、主动平移、失锁、时间间隔及边界；`stabilization_media` 使用真实 RGA 核对 ROI、非紧密 stride、颜色、letterbox 和灰度双槽。对照工具经过 MPP/RGA 处理可重复的抖动 JPEG，保存并排视频、截图、ROI 和 RMS 指标，并比较相同裁剪输入在单 Context 与三个单核 Context 的推理结果。
-
-基准工具交替运行关闭/开启各三轮 300 帧，随后开启防抖连续 3000 输出帧。分别记录输出 FPS、实际检测 FPS、CPU、延迟、新增防抖耗时、FD、RSS 和温度；输出 FPS 不代表每帧检测。测试完成后退出自己的采集进程，不启动长期推流。
-
-本次完整回归、对照视频、3000 帧性能和现场背景不足的验证边界见 [验收报告](../../test/reports/stabilization_validation.md)。
+检查 `valid_frames`、`lost_frames`、`reference_resets` 与 ROI 是否和现场画面相符。2026-11-18 的 COCO640 FP16 / split 实摄关闭预览和推流，3,000 个输出帧约为 29.98 FPS，实际检测约为 14.31 FPS。现场静态背景不足，多数帧进入失锁回中；抑抖幅度由可重复的抖动 JPEG 硬件回放测得。板上还以真实 RGA 核对了裁剪位置、颜色、letterbox、非紧密 stride 和灰度双槽复用。

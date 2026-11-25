@@ -142,9 +142,15 @@ def native_tools():
     ):
         report(Path(path).is_file(), 'SDK/development file', path)
     mediamtx = ROOT / 'tools/mediamtx/v1.21.2/mediamtx'
-    status, output = run([str(mediamtx), '--version'])
-    report(status == 0 and '1.21.2' in output, 'MediaMTX version only', output)
+    if mediamtx.exists() or mediamtx.is_symlink():
+        status, output = run([str(mediamtx), '--version'])
+        report(status == 0 and '1.21.2' in output, 'MediaMTX version only', output)
+    else:
+        print('SKIP MediaMTX: optional streaming server is not installed')
     for directory in ('yolo_run', 'test'):
+        if directory == 'test' and not (ROOT / directory).exists():
+            print('SKIP test native preset: board-local test suite is absent')
+            continue
         status, output = run(['/usr/bin/cmake', '--list-presets'], cwd=ROOT / directory)
         report(status == 0 and 'rk3588-release' in output, f'{directory} native preset')
     for name in ('yolo_run', 'camera_run', 'camera_live', 'yolo_multi'):

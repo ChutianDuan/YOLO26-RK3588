@@ -18,13 +18,15 @@
 
 ## 构建与单张图验证
 
+用自己的图片路径替换 `/path/to/your-image.jpg`。
+
 ```bash
 cd /home/yolo
 bash scripts/dev.sh build
-run_dir=$(mktemp -d /home/yolo/test/results/coco640.XXXXXXXX)
+run_dir=$(mktemp -d)
 env -u LD_LIBRARY_PATH -u LD_PRELOAD ./yolo_run/build-rk3588/yolo_run \
   --config /home/yolo/yolo_run/config/camera_coco640.yaml \
-  --input /opt/rockchip/src/rknn_model_zoo/examples/yolo26/model/bus.jpg \
+  --input /path/to/your-image.jpg \
   --output "$run_dir/bus.jsonl" --annotated "$run_dir/bus.jpg"
 ```
 
@@ -32,9 +34,10 @@ env -u LD_LIBRARY_PATH -u LD_PRELOAD ./yolo_run/build-rk3588/yolo_run \
 
 ```bash
 cd /home/yolo/yolo_run
+out=$(mktemp -d)
 env -u LD_LIBRARY_PATH -u LD_PRELOAD ./build-rk3588/camera_live \
   --config /home/yolo/yolo_run/config/camera_coco640.yaml \
-  --preview off --decoder mpp --max-frames 300
+  --preview off --decoder mpp --max-frames 300 --output "$out/live.jsonl"
 ```
 
 默认设备为 `/dev/v4l/by-id/usb-Generic_USB_Camera_200901010001-video-index0`。
@@ -65,10 +68,11 @@ cd /home/yolo/yolo_run
 
 ```bash
 cd /home/yolo/yolo_run
+out=$(mktemp -d)
 env -u LD_LIBRARY_PATH -u LD_PRELOAD ./build-rk3588/camera_live \
   --config /home/yolo/yolo_run/config/camera_coco640.yaml \
   --preview off --decoder mpp --stream on \
-  --stream-port 12340 --stream-bitrate 2000000
+  --stream-port 12340 --stream-bitrate 2000000 --output "$out/stream.jsonl"
 ```
 
 本地电脑打开 `http://<板端IP>:8889/camera1`。
@@ -76,18 +80,6 @@ env -u LD_LIBRARY_PATH -u LD_PRELOAD ./build-rk3588/camera_live \
 `rtsp://<板端IP>:8554/camera1`。三个自建进程分别按 Ctrl+C 退出。
 协议、缓冲与故障处理详见 [推流说明](STREAMING.md)。
 
-## 回归与验证边界
+## 验证边界
 
-```bash
-cd /home/yolo/test
-cmake --preset rk3588-release
-cmake --build --preset rk3588-release --parallel 4
-ctest --preset rk3588-release -R '^coco_(core|hardware|live|stream)$' --output-on-failure
-```
-
-`coco_core` 无需设备；`coco_hardware` 验证 RGA 缩放、RGB/补边、stride、租约，以及真实 FP16 同一 RGB 的 CPU/FD 输入等价性；`coco_live` 使用 MJPEG 回放验证 MPP、三个 Worker、源坐标与配置/命令行模型优先级；`coco_stream` 用真实摄像头和 FP16 模型验证 H.264、RTSP 解码、WebRTC 协商及自建进程故障恢复。设备测试串行执行，推流测试仅启动并清理自身进程。
-
-日常 `bash scripts/dev.sh test` 按 `cpu` 标签运行九项纯软件回归，已包含 `coco_core`；COCO 硬件验证使用以上命令。
-输出 FPS 包含跟踪预测帧，不能当作实际检测 FPS；编码完成耗时不包含网络和浏览器缓冲。
-完整 COCO 精度、长测和电脑端实际观看延迟需另行测量。本次板端证据见
-[COCO640 验证报告](../../test/reports/coco640_validation.md)。
+单张图可以对照 JSONL 与标注图检查类别和还原后的框。以上摄像头短测会记录实际检测数和输出帧数，输出可包含跟踪预测帧。板端已用真实 RGA 验证补边和 stride，并在同一份 RGB 上对照过 FP16 的 CPU 输入和 FD 输入。编码耗时计到板端编码完成，桌面浏览器实际呈现延迟需要在观看端测量。COCO640 的摄像头与回放条件及历史数据见 [项目 README](../../README.md)。

@@ -108,25 +108,8 @@ MediaMTX 停止、发布器缺席或观看端变慢时，推理及 JSONL 继续�
 
 ## 验证与长测
 
-串行执行硬件测试，避免与正在运行的摄像头进程争用设备：
+保持 MediaMTX 和发布器运行，使用“构建与启动”中的摄像头命令实测。按 Ctrl+C 正常结束后，检查 JSONL 最后一条 `summary` 的 `stream.status`、实际编码数、丢帧及发送错误；观看端可同时执行上面的 `ffprobe` 和 60 帧解码命令。
 
-```bash
-cd /home/yolo/test
-cmake --preset rk3588-release
-cmake --build --preset rk3588-release --parallel 4
-ctest --preset rk3588-release
-```
-
-新增 `stream_media` 验证真实 MPP 编码、色块各通道均值误差≤8、可见尺寸、已知框/ID、PTS 间隔、GOP 和 UDP 包长；`stream_timeout` 注入取包超时及 reset 失败，验证等待完成/隔离规则；`stream_publisher` 验证看门狗；`stream_rtsp` 验证真摄像头、RTSP 解码、WHEP 协商、慢客户端、服务和发布器重启、慢编码及编码失败隔离。
-
-手动开始三十分钟真机长测（输出目录必须不存在；脚本会启动并清理自己创建的进程）：
-
-```bash
-cd /home/yolo
-/usr/bin/python3 test/tools/stream_soak.py --seconds 1800 \
-  --output test/results/stream_implementation/soak-new
-```
-
-长测记录摄像头、发布器、FFmpeg、MediaMTX、拉流端的 CPU/RSS/FD，NPU 负载、温度和编码统计。完整验证结果见 [实施验收](../../test/reports/streaming_validation.md)。
+在防抖接入前版本，真实 USB 摄像头以交通 INT8、split、关闭预览运行 1,800 秒，输出、推理和编码各 53,988 帧，编码 P99 为 3 ms，采集到编码完成 P99 为 39 ms。编码池丢帧、等待槽替换和发送错误各为 0，设备序号有一次缺口。
 
 Mac VLC/ffplay 和 Safari/Chrome 的真实播放需要在客户端另外验收；WHEP SDP 成功不代表媒体已经在浏览器播放。玻璃到玻璃延迟可同时拍摄现场计时器与 Mac 画面测量，不能用不同主机未经同步的时钟直接相减。

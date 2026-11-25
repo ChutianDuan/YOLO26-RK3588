@@ -1,5 +1,5 @@
 {
   "npu_mode": "split",
   "selection": "RK3588 YOLO26 INT8: fixed-input outputs identical; 900-frame paced replay correction-age P95 default=105ms, all=136ms, split=73ms; each mode passed 3000-frame camera soak",
-  "validation_report": "../../test/validation/camera_live_20261018/experiment/report.md"
+  "validation_report": "../README.md"
 }

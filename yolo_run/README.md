@@ -11,15 +11,15 @@ cd /home/yolo/yolo_run
 ./build-rk3588/yolo_multi --help
 ```
 
-本目录只构建正式应用和库；测试、CPU 参考、故障注入和夹具在 [test/](../test/README.md)，独立生成到 `../test/build-rk3588/bin/`。C++17、系统 GCC/OpenCV/libstdc++、Ninja 并发 4，统一链接现有 `Rockchip::RKNN` / `Rockchip::RGA` / `Rockchip::MPP`；环境与依赖锁见 [环境管理](../docs/environment.md)。
+本目录只构建正式应用和库；CPU 参考、故障注入和回归夹具由开发板本地维护。C++17、系统 GCC/OpenCV/libstdc++、Ninja 并发 4，统一链接现有 `Rockchip::RKNN` / `Rockchip::RGA` / `Rockchip::MPP`；环境与依赖锁见 [开发环境](../环境配置.md)。
 
 ## 运行与配置
 
 | 入口 | 默认配置与行为 | 专题 |
 |---|---|---|
 | `yolo_run` | `config.yaml`，800×608、10 类 FP16；文件视频异步检测、LK/ByteTrack | [源码学习路线](../学习路线.md) |
-| `camera_run` | 不传 `--config` 时使用 800×608 INT8；YUYV 800×600/15 FPS、DMA-BUF、逐帧检测 | [YUYV 链路](../docs/architecture.md#链路一yuyv-摄像头到-rknn) |
-| `camera_live` | 不传 `--config` 时使用 INT8；`config/camera_live.json` 选择 split；MJPEG/MPP、防抖/预览默认开、推流默认关 | [实时链路](../docs/architecture.md#链路二mjpegmpp-实时流水线) |
+| `camera_run` | 不传 `--config` 时使用 800×608 INT8；YUYV 800×600/15 FPS、DMA-BUF、逐帧检测 | [采集实现](camera/v4l2_camera.cpp) |
+| `camera_live` | 不传 `--config` 时使用 INT8；`config/camera_live.json` 选择 split；MJPEG/MPP、防抖/预览默认开、推流默认关 | [实时流水线](camera/live_pipeline.cpp) |
 | `yolo_multi` | `config/video_multi.yaml`，INT8；1～4 路文件、三个单核 Worker、每路一个在途 | [多路运行与验证](video/MULTI_VIDEO.md) |
 
 COCO80 / 640×640 FP16 须传 `--config /home/yolo/yolo_run/config/camera_coco640.yaml`；切换模型须匹配尺寸、标签和双输出契约。`--model` 优先覆盖配置中的模型路径；配置路径相对于配置文件，CLI 模型路径相对于工作目录。单输出 `[1,300,6]` e2e 模型尚未接入此双输出引擎。
@@ -40,8 +40,8 @@ COCO80 / 640×640 FP16 须传 `--config /home/yolo/yolo_run/config/camera_coco64
 | RGA → RKNN | [预处理](image/image_processing.cpp) 写独立 RGB 并发布输入；[引擎](model/yolo_engine.cpp) 分别持有注册缓存和在途输入 |
 | 防抖 ROI | [FrameStabilizer](video/frame_stabilizer.cpp)：两槽小图灰度、CPU 背景估计；[流水线](camera/live_pipeline.cpp) 分流前固定本帧 ROI |
 
-`Renderer` 的 Mat 是借用视图，CPU 使用必须在 `finish()` 前完成。共享引用、Cache Sync、RGA `IM_SYNC`、MPP/RKNN 完成确认分别承担不同职责。源 NV12 的最后消费者归还后可复用；NPU 此时可继续读取独立 RGB。完整数量、同步与退出图见 [架构与缓冲所有权](../docs/architecture.md)。
+`Renderer` 的 Mat 是借用视图，CPU 使用必须在 `finish()` 前完成。共享引用、Cache Sync、RGA `IM_SYNC`、MPP/RKNN 完成确认分别承担不同职责。源 NV12 的最后消费者归还后可复用；NPU 此时可继续读取独立 RGB。分流与线程退出顺序可在 [实时流水线](camera/live_pipeline.cpp) 中核对。
 
 ## 验证边界
 
-[最新防抖验收](../test/reports/stabilization_validation.md) 与 [DMA 单路径验收](../test/reports/dma_only_validation.md) 记录给定版本和输入下的构建、运行、像素/推理等价及有限长测；其他历史记录见 [报告索引](../test/reports/README.md)。编译成功、运行成功、结果正确与性能达标分别报告，不宣称端到端零拷贝、完整工业精度或无限时长稳定性。
+交通 INT8 的 900 帧定速回放中，default、all 和 split 的校正年龄 P95 分别为 105、136 和 73 ms。单路实摄、文件回放与四路调度的测量条件和数据见 [项目 README](../README.md)。编译成功、运行成功、结果正确与性能达标分别报告，不宣称端到端零拷贝、完整工业精度或无限时长稳定性。

@@ -1,6 +1,6 @@
 # YOLO26s COCO RK3588 models
 
-Project integration status (2026-11-18): the C++ application validates the split-output FP16 model with `yolo_run/config/camera_coco640.yaml`; see [board deployment](../yolo_run/deploy/COCO640.md) and [board validation](../test/reports/coco640_validation.md). The conversion/simulator results below remain separate evidence; they do not establish board validation of all precision variants.
+Project integration status (2026-11-18): the C++ application validates the split-output FP16 model with `yolo_run/config/camera_coco640.yaml`; see [board deployment](../yolo_run/deploy/COCO640.md) and the [on-board camera and replay measurements](../README.md). The conversion/simulator results below remain separate evidence; they do not establish board validation of all precision variants.
 
 Target: RK3588, RKNN-Toolkit2 2.5.0, matching Runtime 2.5.0.
 

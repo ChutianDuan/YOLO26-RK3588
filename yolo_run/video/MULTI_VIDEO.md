@@ -4,7 +4,7 @@
 默认使用现有 YOLO26 INT8 800×608 模型；四路独立 ByteTrack/Kalman，源帧实时播放，检测能力不足时替换过期等待帧。
 检测之间直接使用跟踪器自带的 Kalman 预测；四路入口不运行 LK 或其他图像光流。
 
-完整设计教程见 [从单张图像到多路 NPU：30 FPS 设计详解](../../docs/architecture.md#从单张图像到多路-npu30-fps-设计详解)：先核对单图契约，再理解并发调度、缓冲复用、结果时间和性能验收。四路每路 30 FPS 真实检测需要合计约 120 次/秒；现有报告的约 30 FPS 输出包含预测和重复画面，不能作为该目标已达成的证据。
+阅读实现时可以先核对单图契约，再沿下图跟踪派发、缓冲复用和各路输出。四路每路 30 FPS 真实检测需要合计约 120 次/秒；现有报告的约 30 FPS 输出包含预测和重复画面，不能作为该目标已达成的证据。
 
 ```mermaid
 flowchart LR
@@ -31,10 +31,11 @@ cd /home/yolo/yolo_run
 cmake --preset rk3588-release
 cmake --build --preset rk3588-release
 
+out=$(mktemp -d)
 ./build-rk3588/yolo_multi \
   --input /path/channel0.mp4 --input /path/channel1.mp4 \
   --input /path/channel2.mp4 --input /path/channel3.mp4 \
-  --output-dir /home/yolo/test/results/four_video_NEW \
+  --output-dir "$out/channels" \
   --preview auto --record on
 ```
 
@@ -42,10 +43,11 @@ cmake --build --preset rk3588-release
 
 ```bash
 cd /home/yolo/yolo_run
-clip=/home/yolo/test/rknn_video_compare_20261018_002d290d/video/002d290d-90f2bab2.mov
+clip=/path/to/your-video.mp4
+out=$(mktemp -d)
 ./build-rk3588/yolo_multi \
   --input "$clip" --input "$clip" --input "$clip" --input "$clip" \
-  --output-dir /home/yolo/test/results/four_video_NEW --preview off --record on
+  --output-dir "$out/channels" --preview off --record on
 ```
 
 输出目录必须不存在，重复运行请换目录。`--config` 默认指向 `config/video_multi.yaml`；`--model` 可覆盖该配置里的模型路径，不改变旧入口的默认 FP16 配置。
@@ -88,9 +90,10 @@ OpenCV/FFmpeg 每路固定一个解码线程，输出 CPU BGR；预处理仍有�
 `--detect-fps 0` 保留四路对三个 NPU Worker 的持续竞争；例如设置 `--detect-fps 8`，则减少正常检测请求，中间画面仍按视频输出节奏预测。实际请求时刻量化到可用源帧，解码不足或 NPU 繁忙时检测率会降低，结束时额外补交最后一个已发布画面。频率受限的运行应标为“检测请求频率受限”，不能用来报告 NPU 最大吞吐。
 
 ```bash
+out=$(mktemp -d)
 ./build-rk3588/yolo_multi \
   --input "$clip" --input "$clip" --input "$clip" --input "$clip" \
-  --output-dir /home/yolo/test/results/four_prediction_NEW \
+  --output-dir "$out/channels" \
   --preview off --record on --detect-fps 8 --track-max-age-ms 500
 ```
 
@@ -126,22 +129,22 @@ JSONL 的 `type=detection` 是实际推理结果，包含 Worker/核编号、检
 
 ## 验证命令
 
-```bash
-cd /home/yolo/test
-cmake --preset rk3588-release
-cmake --build --preset rk3588-release
-ctest --preset rk3588-release \
-  -R '^(multi_scheduler|multi_recorder|multi_prediction|multi_video|core|hardware|live_core|live_npu|cli)$'
+用本页四路命令完成一次短测后，从结果目录读取各通道的汇总：
 
-/usr/bin/python3 -B tools/benchmark_multi_video.py \
-  --output-dir results/four_video_benchmark_NEW \
-  --short-seconds 20 --soak-seconds 600
+```bash
+/usr/bin/python3 - "$out/channels" <<'PYTHON'
+import json, sys
+from pathlib import Path
+for path in sorted(Path(sys.argv[1]).glob('stream_*/summary.json')):
+    stats = json.loads(path.read_text())
+    print(path.parent.name, stats['inference_count'], stats['output_fps'])
+PYTHON
 ```
 
-测试工程也会生成 `test/build-rk3588/bin/yolo_multi`。硬件测试与基准串行执行。基准生成足够长的交通视频，依次比较三路/四路、录制关闭/开启，最后执行四路十分钟长测；保存命令、输入/模型/SDK/二进制哈希、原始结果、资源采样和报告。首次验证不设每路 FPS 门槛；结果正确性、公平派发和实际吞吐分别验收。
+比较真实检测数、逐路分配与输出速率。长测可在输入足够长时加入 `--duration-seconds 600`，分别打开和关闭录像，观察推理吞吐与录像开销。
 
 本入口不接摄像头、RTSP 或通用 MPP 文件解码。现有 `camera_live`、`camera_run`、`yolo_run` 保持各自行为。桌面窗口显示需要在真实图形会话单独验收。
 
-原四路版板端基线：8/8相关回归通过、四路十分钟长测完成，每路检测约13 FPS，四路录制短测约12.2～12.5 FPS；输出约30 FPS含复用帧。该历史基线见 [四路验收报告](../../test/reports/multi_video_validation.md)，新增原生预测指标与检测频率参数须以本次验证结果为准。
+原四路版板端基线：8/8相关回归通过、四路十分钟长测完成，每路检测约13 FPS，四路录制短测约12.2～12.5 FPS；输出约30 FPS含复用帧。
 
-本次原生预测版：9/9相关回归通过、10次板端运行完成、四路120秒连续预测通过。设置检测请求上限8次/秒时，长测实际每路约7.25～7.28次检测/秒，不同源画面预测约22.7～22.9 FPS，输出约30.1 FPS含复用帧；详细结果和边界见 [原生预测验收报告](../../test/reports/multi_prediction_validation.md)。
+本次原生预测版：9/9相关回归通过、10次板端运行完成、四路120秒连续预测通过。设置检测请求上限8次/秒时，长测实际每路约7.25～7.28次检测/秒，不同源画面预测约22.7～22.9 FPS，输出约30.1 FPS含复用帧。两次运行的条件与数据见 [项目 README](../../README.md)。
