@@ -4,7 +4,18 @@ C++17 板端工程，运行于 RK3588 ARM64 / Linux 6.6.89-kdev，复用 RKNN Ru
 
 板端源码、RKNN 权重和测试工具在本仓库维护。主机端训练、导出与工作台见 [VisionTrack](https://github.com/ChutianDuan/Yolo)。
 
-文档核对日期：**2026-11-18（Asia/Shanghai）**，包含当前工作区的 COCO640、DMA-BUF 单路径和实时平移防抖。完整导航见 [文档索引](docs/README.md)。
+## 实验结果
+
+**单路 COCO640 实摄**在 RK3588 上使用 INT8、两个 NPU Context 和压缩包 FIFO，整个进程限定在 A76 核上。三轮各 60 秒，共采集 5,402 帧，每帧都完成检测、跟踪校正和画面输出。检测和画面的 P99 延迟分别为 70.41 ms 和 26.20 ms，均取三轮中位数。[实验结果索引](profiling/results/README.md)
+
+| 想看什么 | 入口 |
+|---|---|
+| 比较 COCO INT8 与 FP16、单核与多核，以及 10 分钟长稳结果 | [144 轮回放对照](profiling/results/comparison.md) |
+| 在一帧上查看采集、排队、推理和画面输出的先后关系 | [离线交互报告](profiling/examples/replay/report.html) |
+| 在自己的板上重复摄像头或回放实验 | [配置与复现命令](profiling/README.md#重现实验) |
+| 查找其他模型精度、多路视频、防抖和推流实验 | [历史性能与精度](docs/performance.md) · [验收报告索引](test/reports/README.md) |
+
+程序用法、架构与部署见 [项目文档索引](docs/README.md)。
 
 ## 当前能力与默认值
 
@@ -16,7 +27,7 @@ C++17 板端工程，运行于 RK3588 ARM64 / Linux 6.6.89-kdev，复用 RKNN Ru
 | `yolo_multi` | 1～4 路本地视频文件 | INT8、三核固定 Worker、公平派发；每路独立预测/校正和输出，不运行 LK |
 
 - 生产预处理统一使用 RGA / DMA-BUF；YUYV 不再提供 `copy/auto`，实时解码不再提供 OpenCV 分支。文件视频仍使用 CPU OpenCV/FFmpeg 解码并上传 BGR；CPU 像素/推理参考保留在测试中。
-- COCO80 / 640×640 FP16 使用显式配置 [camera_coco640.yaml](yolo_run/config/camera_coco640.yaml)，须匹配模型、尺寸和标签；仅替换 `.rknn` 路径不足以切换契约。
+- COCO80 / 640×640 配置默认加载 FP16。复现实验中的 INT8 时，同时传入该配置和 `--model yolo_model_rknn/yolo26s_coco_int8.rknn`，沿用相同的标签、输入尺寸和 letterbox。[COCO640 配置](yolo_run/config/camera_coco640.yaml)
 - 实时防抖默认保留 720×540 ROI、输出 800×600；检测、跟踪、预览和推流共享防抖画布坐标。`--stabilize off` 使用完整原图，JSONL schema v2 保存坐标类型和逐帧 ROI，详见 [防抖说明](yolo_run/deploy/STABILIZATION.md)。
 - 推流链路为 C++ MPP H.264 → MPEG-TS/本机 UDP → 独立 FFmpeg → 独立 MediaMTX → RTSP/WebRTC。当前支持这些协议的输出；RTSP 输入和 H.264 输入硬解仍是后续工作。
 
@@ -89,8 +100,6 @@ run_dir=$(mktemp -d /home/yolo/test/results/multi.XXXXXXXX)
 
 远程观看按 [推流部署](yolo_run/deploy/STREAMING.md) 分别启动 MediaMTX、发布器和 `camera_live --stream on`；COCO 完整步骤见 [COCO640 部署](yolo_run/deploy/COCO640.md)。板端地址以 `hostname -I` 为准，文档示例地址须按实际网络替换。
 
-单路摄像头和回放支持按帧追踪、Perfetto 导出与 PC 离线时间线。构建、采集、真实示例与 COCO INT8 调度对照见 [单路性能追踪](profiling/README.md)。
-
 ## 架构与内存边界
 
 ```text
@@ -107,7 +116,9 @@ RGA 读取源分配并写入独立 RGB 分配，RKNN 导入同一 RGB FD。各 W
 
 ## 验证与后续工作
 
-最近的 [2026-11-18 防抖验收](test/reports/stabilization_validation.md) 记录 28/28 回归通过；COCO FP16、split、无预览/推流，3000 输出帧约 29.98 FPS，实际检测约 14.31 FPS。实机场景静态背景不足，大部分帧进入失锁回中；量化抑抖效果来自可重复硬件回放，不能推断现场已持续有效防抖。
+单路追踪提交前，板端完整回归通过 30/30 项，实摄短测的 91 个采集帧全部核对到终态。[板端验证记录](profiling/validation.md)
+
+2026-11-18 的防抖验收使用 COCO FP16、split，关闭预览和推流。3,000 个输出帧约为 29.98 FPS，实际检测约为 14.31 FPS。实机场景静态背景不足，多数帧进入失锁回中，抑抖幅度由可重复的硬件回放测得。[防抖验收](test/reports/stabilization_validation.md)
 
 [历史性能与精度](docs/performance.md) 保留三模型、单路推流和多路实验的日期及条件。仍需补 Hybrid 同帧 mAP、评测时间索引修正、当前版本长测、RTSP 输入与恢复、真实观看端延迟和独立工业数据集；见 [后续路线](docs/development-roadmap.md)。
 
