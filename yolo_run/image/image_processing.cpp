@@ -1,15 +1,16 @@
 #include "image/image_processing.h"
 #include "image/dma_buffer.h"
 #include "image/frame_lease.h"
+#include "profiling/trace.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstring>
+#include <im2d.hpp>
 #include <iostream>
 #include <limits>
-#include <stdexcept>
-#include <im2d.hpp>
 #include <opencv2/imgproc.hpp>
+#include <stdexcept>
 
 namespace yolo {
 namespace {
@@ -152,6 +153,7 @@ public:
         requireAvailableInput();
         const auto g = resizeGeometry(f.width, f.height, config);
         ensureRgbDestination();
+        auto slot = trace::lease(destination, trace::RgbPool, trace::lane(), trace::currentFrame());
         initializePadding(g);
         auto src = wrapbuffer_handle(f.dma->handle, f.width, f.height, RK_FORMAT_YCbCr_420_SP,
                                      f.width_stride, f.height_stride);
@@ -162,12 +164,14 @@ public:
         const im_rect sr{roi.x, roi.y, roi.width, roi.height}, dr{g.left, g.top, g.width, g.height};
         checkRga(imcheck(src, dst, sr, dr, 0), "RGA NV12 layout check");
         im_opt_t options{}; options.core = IM_SCHEDULER_RGA3_CORE0 | IM_SCHEDULER_RGA3_CORE1;
+        trace::Scope rga_call(trace::Rga);
         const auto rc = improcess(src, dst, {}, sr, dr, {}, -1, nullptr, &options, IM_SYNC);
+        rga_call.end();
         if (rc != IM_STATUS_SUCCESS && rc != IM_STATUS_NOERROR) {
             std::cerr << "fatal: RGA NV12 completion uncertain: " << imStrError(rc) << '\n';
             std::terminate();
         }
-        return makeDmaInput(f.width, f.height, g);
+        return makeDmaInput(f.width, f.height, g, std::move(slot));
     }
 
 private:
@@ -197,12 +201,13 @@ private:
     }
 
     // 只在同步 RGA 成功后发布：不打开 CPU READ 区间，也不复制 RGB 像素。
-    TensorInput makeDmaInput(int image_width, int image_height, const ResizeGeometry& geometry) {
+    TensorInput makeDmaInput(int image_width, int image_height, const ResizeGeometry &geometry,
+                             std::shared_ptr<DmaBuffer> slot = {}) {
         TensorInput input;
         input.image_width = image_width;
         input.image_height = image_height;
         input.letterbox = geometry.transform;
-        input.owner = std::make_shared<FrameLease>(destination);
+        input.owner = std::make_shared<FrameLease>(slot ? std::move(slot) : destination);
         frame_lease = input.owner;
         input.dma = DmaTensorInput{destination, destination->fd, destination->data, destination->size,
                                   config.input_width, config.input_height,

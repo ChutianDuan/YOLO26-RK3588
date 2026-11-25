@@ -54,15 +54,18 @@ DmaBuffer::~DmaBuffer() {
     if (fd >= 0) close(fd);
 }
 
-void DmaBuffer::sync(uint64_t flags) {
+int syncDmaFd(int fd, uint64_t flags) noexcept {
     dma_buf_sync request{};
     request.flags = flags;
     int rc;
     do {
         rc = ioctl(fd, DMA_BUF_IOCTL_SYNC, &request);
-    } while (rc && errno == EINTR);
+    } while (rc && (errno == EINTR || errno == EAGAIN));
+    return rc;
+}
 
-    if (rc) {
+void DmaBuffer::sync(uint64_t flags) {
+    if (syncDmaFd(fd, flags)) {
         healthy = false;
         fail("DMA cache sync");
     }

@@ -31,7 +31,7 @@ bash scripts/dev.sh test
 
 生产产物在 `yolo_run/build-rk3588/`，包含上表四个程序。测试可执行文件在 `test/build-rk3588/bin/`，直接复用正式源码。原生 C++17 / Ninja 构建并发 4，C++ 链接系统 OpenCV/libstdc++ 和现有 Rockchip Targets。
 
-日常 `test` 按 `cpu` 标签执行 **9 项无需摄像头、NPU、RGA/MPP 硬件的回归**，包括 COCO 契约、防抖算法、录像、调度和发布器模拟。完整套件 **28 项**另含实际硬件测试，需独占设备并串行执行：
+日常 `test` 按 `cpu` 标签执行 **10 项无需摄像头、NPU、RGA/MPP 硬件的回归**，包括 COCO 契约、防抖算法、录像、调度和发布器模拟。完整套件 **30 项**另含实际硬件测试，需独占设备并串行执行：
 
 ```bash
 ctest --test-dir /home/yolo/test/build-rk3588 --output-on-failure -j1
@@ -88,6 +88,8 @@ run_dir=$(mktemp -d /home/yolo/test/results/multi.XXXXXXXX)
 逐路参数、四宫格、录像和基准命令见 [四路视频说明](yolo_run/video/MULTI_VIDEO.md)。只有一路时，每路一个在途任务的限制仍然生效，不能据三 Worker 推导单路三帧并发。
 
 远程观看按 [推流部署](yolo_run/deploy/STREAMING.md) 分别启动 MediaMTX、发布器和 `camera_live --stream on`；COCO 完整步骤见 [COCO640 部署](yolo_run/deploy/COCO640.md)。板端地址以 `hostname -I` 为准，文档示例地址须按实际网络替换。
+
+单路摄像头和回放支持按帧追踪、Perfetto 导出与 PC 离线时间线。构建、采集、真实示例与 COCO INT8 调度对照见 [单路性能追踪](profiling/README.md)。
 
 ## 架构与内存边界
 

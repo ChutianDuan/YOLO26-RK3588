@@ -1,4 +1,5 @@
 #include "camera/live_pipeline.h"
+#include "camera/packet_channel.h"
 #include "camera/stream_output.h"
 #include "model/yolo_engine.h"
 #include "tracking/byte_tracker.h"
@@ -6,17 +7,18 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
-#include <functional>
 #include <deque>
-#include <fstream>
-#include <iostream>
-#include <thread>
-#include <sys/resource.h>
-#include <unistd.h>
 #include <fcntl.h>
-#include <rknn_api.h>
+#include <fstream>
+#include <functional>
+#include <iostream>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+#include <pthread.h>
+#include <rknn_api.h>
+#include <sys/resource.h>
+#include <thread>
+#include <unistd.h>
 
 namespace yolo::live {
 using Json = nlohmann::json;
@@ -48,24 +50,40 @@ private:
 // 与 LatestSlot 不同：正常运行中不主动替换旧结果，finish 保留已排队的数据。
 template<class T> class BoundedQueue {
 public:
-    explicit BoundedQueue(size_t capacity) : capacity_(capacity) {}
+    using Id = uint64_t (*)(const T&);
+    explicit BoundedQueue(size_t capacity, Id id = nullptr) : capacity_(capacity), id_(id) {}
+    void event(trace::Kind k, const T& v) {
+        if (trace::enabled() && id_)
+            trace::emit(k, trace::ResultQueue, id_(v));
+    }
     void push(T value) {
         std::unique_lock<std::mutex> lock(mutex_);
         if (!space_.wait_for(lock, std::chrono::milliseconds(250), [&] { return closed_ || queue_.size() < capacity_; }))
             throw std::runtime_error("bounded queue full for 250 ms");
         if (closed_) throw std::runtime_error("bounded queue closed");
-        queue_.push_back(std::move(value)); peak_ = std::max(peak_, queue_.size()); data_.notify_one();
+        event(trace::Enter, value);
+        queue_.push_back(std::move(value));
+        peak_ = std::max(peak_, queue_.size());
+        data_.notify_one();
     }
     std::optional<T> take() {
         std::unique_lock<std::mutex> lock(mutex_);
         data_.wait(lock, [&] { return closed_ || !queue_.empty(); });
         if (queue_.empty()) return {};
-        T value = std::move(queue_.front()); queue_.pop_front(); space_.notify_one(); return value;
+        event(trace::Leave, queue_.front());
+        T value = std::move(queue_.front());
+        queue_.pop_front();
+        space_.notify_one();
+        return value;
     }
     std::vector<T> drainReady() {
         std::lock_guard<std::mutex> lock(mutex_);
         std::vector<T> result;
-        while (!queue_.empty()) { result.push_back(std::move(queue_.front())); queue_.pop_front(); }
+        while (!queue_.empty()) {
+            event(trace::Leave, queue_.front());
+            result.push_back(std::move(queue_.front()));
+            queue_.pop_front();
+        }
         space_.notify_all(); return result;
     }
     void finish() { std::lock_guard<std::mutex> lock(mutex_); closed_ = true; data_.notify_all(); space_.notify_all(); }
@@ -76,6 +94,7 @@ private:
     std::condition_variable data_, space_;
     std::deque<T> queue_;
     size_t capacity_, peak_ = 0;
+    Id id_;
     bool closed_ = false;
 };
 // 单独线程顺序写 JSONL。队列只保存检测/轨迹等数值，不延长图像 DMA-BUF 的租约。
@@ -87,8 +106,16 @@ public:
         if (fd < 0) throw std::runtime_error("cannot create new JSONL: " + options.output + ": " + std::strerror(errno));
         file_ = fdopen(fd, "w");
         if (!file_) { close(fd); throw std::runtime_error("fdopen JSONL failed"); }
-        try { thread_ = std::thread([this] { run(); }); }
-        catch (...) { fclose(file_); file_ = nullptr; throw; }
+        try {
+            thread_ = std::thread([this] {
+                trace::thread(trace::Writer);
+                run();
+            });
+        } catch (...) {
+            fclose(file_);
+            file_ = nullptr;
+            throw;
+        }
     }
     ~Writer() { queue_.finish(); if (thread_.joinable()) thread_.join(); if (file_) fclose(file_); }
     void push(Json row) {
@@ -107,6 +134,7 @@ private:
         try {
             while (auto row = queue_.take()) {
                 if (before_write_) before_write_();
+                trace::Scope write(trace::Write, trace::enabled() ? row->value("frame_id", uint64_t(0)) : 0);
                 const auto text = row->dump();
                 if (fwrite(text.data(), 1, text.size(), file_) != text.size() || fputc('\n', file_) == EOF || fflush(file_))
                     throw std::runtime_error("camera_live JSONL write failed");
@@ -173,31 +201,46 @@ Json runLive(FrameSource& source, const AppConfig& config, const LiveOptions& op
         !std::isfinite(options.max_predict_ms) || options.max_predict_ms < 0 || options.max_predict_ms > 1000 ||
         !std::isfinite(options.stabilize_alpha) || options.stabilize_alpha <= 0 || options.stabilize_alpha > 1)
         throw std::runtime_error("invalid detection frequency/prediction horizon");
-    // split 才创建 3 套固定 Worker；all 仍只有 1 个 Worker，不会并发执行三帧。
-    const int worker_count = options.npu_mode == "split" ? 3 : 1;
+    // 每个显式掩码对应一个独立 Context 和一条追踪轨道。默认 split 使用 1、2、4。
+    if (options.masks.size() > 3) throw std::invalid_argument("at most three NPU workers supported");
+    const int worker_count =
+        options.masks.empty() ? (options.npu_mode == "split" ? 3 : 1) : int(options.masks.size());
+    trace::emit(trace::Counter, trace::PoolCapacity, 0, 0, worker_count, trace::RgbPool);
     std::vector<std::unique_ptr<YoloEngine>> engines;
     std::vector<std::unique_ptr<ImagePreprocessor>> processors;
     for (int i = 0; i < worker_count; ++i) {
         // 位掩码 1/2/4 分别选择 Core0/1/2；不是 CPU 线程绑核，也不是帧轮询编号。
-        const int mask = options.npu_mode == "split" ? (1 << i) : (options.npu_mode == "all" ? int(RKNN_NPU_CORE_0_1_2) : -1);
-        engines.push_back(std::make_unique<YoloEngine>(config, mask));
+        const int mask = !options.masks.empty() ? options.masks.at(i)
+                         : options.npu_mode == "split"
+                             ? (1 << i)
+                             : (options.npu_mode == "all" ? int(RKNN_NPU_CORE_0_1_2) : -1);
+        trace::emit(trace::Instant, trace::WorkerMask, 0, 0, uint32_t(mask), trace::Worker0 + i);
+        engines.push_back(std::make_unique<YoloEngine>(config, mask, false, options.cpu_copy));
         // 每套 Context 独占预处理器和 RGB 目标，按该模型查询到的 stride/容量分配。
-        // 三个 Worker 不共用一个可写 RGB 输入，也不并发调用同一个预处理实例。
+        // 各 Worker 不共用一个可写 RGB 输入，也不并发调用同一个预处理实例。
         processors.push_back(std::make_unique<ImagePreprocessor>(config, engines.back()->inputMemoryLayout()));
     }
-    MjpegDecoder decoder(config.inference_timeout_ms);
+    MjpegDecoder decoder(config.inference_timeout_ms, options.surface_count);
     Renderer renderer;
     FrameStabilizer stabilizer(options.stabilize_alpha);
     if (options.stream && (!options.stream_port || options.stream_bitrate < 64000 || options.stream_bitrate > 14000000))
         throw std::runtime_error("invalid streaming options");
     std::unique_ptr<StreamOutput> stream;
     if (options.stream) stream = std::make_unique<StreamOutput>(options.stream_port, options.stream_bitrate,
-        config.inference_timeout_ms, callbacks.before_encode);
-    // 这里只保存最新等待项：压缩包 → 解码，NV12 → 推理/输出两路。
+        config.inference_timeout_ms, callbacks.before_encode, options.unpaced);
+    // 解码后的 NV12 分给推理与输出队列，各自通过阻塞或替换等待项控制积压。
     // 替换等待项释放该项租约；正在执行的线程仍持有自己的副本，不会被替换覆盖。
-    LatestSlot<EncodedFrame> packets;
-    LatestSlot<DecodedFrame> infer_frames, output_frames;
-    BoundedQueue<Completed> results(3); // 三个 Worker 的结果汇入唯一的轨迹校正线程。
+    PacketChannel packets(options.packet_spsc, options.packet_fifo || options.unpaced);
+    auto decoded_id = [](const DecodedFrame &f) { return f.stamp.frame_id; };
+    LatestSlot<DecodedFrame> infer_frames(trace::InferQueue, decoded_id, options.infer_depth,
+                                          options.queue_policy == "fifo",
+                                          [](DecodedFrame &f, uint64_t n) { f.stamp.dispatch = n; });
+    LatestSlot<DecodedFrame> output_frames(trace::OutputQueue, decoded_id, 1, options.unpaced);
+    std::mutex order_mutex;
+    std::condition_variable order_changed;
+    uint64_t next_dispatch = 1;
+    BoundedQueue<Completed> results(
+        3, [](const Completed &c) { return c.stamp.frame_id; }); // 各推理结果汇入唯一的轨迹校正线程。
     std::atomic<bool> stop{false};
     std::atomic<uint64_t> decoded{0}, pool_dropped{0}, inference_count{0}, late_results{0}, accepted{0}, detect_rate_skipped{0};
     std::atomic<int> remaining_workers{worker_count};
@@ -211,28 +254,69 @@ Json runLive(FrameSource& source, const AppConfig& config, const LiveOptions& op
         return {};
     };
     // close 舍弃尚未开始的帧，并唤醒阻塞消费者；不会撤销已提交的硬件任务。
-    auto stopNewWork = [&] { stop.store(true); packets.close(); infer_frames.close(); output_frames.close(); };
+    auto stopNewWork = [&] {
+        {
+            std::lock_guard<std::mutex> lock(order_mutex);
+            stop.store(true);
+        }
+        order_changed.notify_all();
+        packets.close();
+        infer_frames.close();
+        output_frames.close();
+    };
     auto fail = [&](std::string text) {
-        { std::lock_guard<std::mutex> lock(error_mutex); if (error.empty()) error = std::move(text); }
+        trace::emit(trace::Error, trace::FrameError, trace::currentFrame());
+        {
+            std::lock_guard<std::mutex> lock(error_mutex);
+            if (error.empty())
+                error = std::move(text);
+        }
         stopNewWork();
     };
     Writer writer(options, fail, callbacks.before_write);
     auto metadata = source.info();
     const auto geometry = resizeGeometry(800, 600, config);
-    metadata.update({{"type", "camera_live"}, {"schema_version", 2}, {"decoder", "mpp"},
-        {"npu_mode", options.npu_mode}, {"workers", worker_count}, {"preview", options.preview},
-        {"stream", {{"enabled", options.stream}, {"port", options.stream_port}, {"bitrate", options.stream_bitrate},
-            {"codec", "h264"}, {"transport", "loopback_udp_mpegts"}}},
-        {"stabilization", {{"enabled",options.stabilize},{"alpha",options.stabilize_alpha},
-            {"analysis_width",320},{"analysis_height",240},{"crop_width",720},{"crop_height",540},
-            {"loss_policy","smooth_recenter"},{"transform","view=(raw-roi_origin)*view_size/roi_size"}}},
-        {"max_predict_ms", options.max_predict_ms}, {"detect_fps", options.detect_fps},
-        {"model", config.model_path}, {"model_width", config.input_width}, {"model_height", config.input_height},
-        {"num_classes", config.num_classes}, {"labels_path", config.labels_path}, {"bbox_coordinates", options.stabilize ? "stabilized_800x600" : "source_800x600"},
-        {"padding", {{"top", geometry.top}, {"bottom", config.input_height - geometry.height - geometry.top},
-            {"left", geometry.left}, {"right", config.input_width - geometry.width - geometry.left}, {"rgb", {114,114,114}}}},
-        {"scale_x", geometry.transform.scale_x}, {"scale_y", geometry.transform.scale_y},
-        {"packet_pool", metadata.value("packet_pool_buffers", 4)}, {"decoded_pool", 8}, {"snapshot_history", 64}, {"json_queue_capacity", 64}});
+    metadata.update({{"type", "camera_live"},
+                     {"schema_version", 2},
+                     {"decoder", "mpp"},
+                     {"npu_mode", options.npu_mode},
+                     {"workers", worker_count},
+                     {"preview", options.preview},
+                     {"stream",
+                      {{"enabled", options.stream},
+                       {"port", options.stream_port},
+                       {"bitrate", options.stream_bitrate},
+                       {"codec", "h264"},
+                       {"transport", "loopback_udp_mpegts"}}},
+                     {"stabilization",
+                      {{"enabled", options.stabilize},
+                       {"alpha", options.stabilize_alpha},
+                       {"analysis_width", 320},
+                       {"analysis_height", 240},
+                       {"crop_width", 720},
+                       {"crop_height", 540},
+                       {"loss_policy", "smooth_recenter"},
+                       {"transform", "view=(raw-roi_origin)*view_size/roi_size"}}},
+                     {"max_predict_ms", options.max_predict_ms},
+                     {"detect_fps", options.detect_fps},
+                     {"model", config.model_path},
+                     {"model_width", config.input_width},
+                     {"model_height", config.input_height},
+                     {"num_classes", config.num_classes},
+                     {"labels_path", config.labels_path},
+                     {"bbox_coordinates", options.stabilize ? "stabilized_800x600" : "source_800x600"},
+                     {"padding",
+                      {{"top", geometry.top},
+                       {"bottom", config.input_height - geometry.height - geometry.top},
+                       {"left", geometry.left},
+                       {"right", config.input_width - geometry.width - geometry.left},
+                       {"rgb", {114, 114, 114}}}},
+                     {"scale_x", geometry.transform.scale_x},
+                     {"scale_y", geometry.transform.scale_y},
+                     {"packet_pool", metadata.value("packet_pool_buffers", 4)},
+                     {"decoded_pool", options.surface_count},
+                     {"snapshot_history", 64},
+                     {"json_queue_capacity", 64}});
     writer.push(metadata);
     Distribution decode_ms, preprocess_ms, infer_ms, postprocess_ms, result_age_ms, output_latency_ms, correction_age_ms, prediction_ms;
     Distribution stabilize_ms, gray_ms, motion_ms;
@@ -240,6 +324,8 @@ Json runLive(FrameSource& source, const AppConfig& config, const LiveOptions& op
     Resources resources;
     rusage usage_start{}; getrusage(RUSAGE_SELF, &usage_start);
     const double start = nowMs();
+    double capture_origin = 0, capture_last = 0;
+    uint64_t window_inputs = 0;
     uint64_t output_count = 0, empty_snapshot_frames = 0;
     double first_output_ts = 0, last_output_ts = 0;
     std::vector<std::thread> workers;
@@ -254,8 +340,9 @@ Json runLive(FrameSource& source, const AppConfig& config, const LiveOptions& op
     };
     try {
         correction_thread = std::thread([&] {
+            trace::thread(trace::Tracker);
             try {
-                // 全流水线只有这一份权威跟踪状态：跨三个 Worker 统一关联并分配 ID。
+                // 全流水线只有这一份权威跟踪状态：跨 Worker 统一关联并分配 ID。
                 // 每个 Worker 只做检测，不能各自创建 tracker，否则同一目标会产生多套 ID。
                 ByteTracker tracker;
                 int64_t watermark = -1;
@@ -263,100 +350,220 @@ Json runLive(FrameSource& source, const AppConfig& config, const LiveOptions& op
                 while (auto first = results.take()) {
                     // 只对当前已完成的一批排序，不等待更早的慢帧；已经越过时间水位的
                     // 迟到结果随后丢弃，防止旧检测让轨迹回退到过去。
-                    auto ready = results.drainReady(); ready.push_back(std::move(*first));
+                    auto ready = results.drainReady();
+                    ready.push_back(std::move(*first));
                     std::sort(ready.begin(), ready.end(), [](const auto& a, const auto& b) { return a.stamp.timestamp_ms < b.stamp.timestamp_ms; });
                     for (auto& item : ready) {
-                        if (item.stamp.sequence <= watermark || item.stamp.timestamp_ms <= last_source_ms) { ++late_results; continue; }
+                        trace::frame(item.stamp.frame_id);
+                        if (item.stamp.sequence <= watermark || item.stamp.timestamp_ms <= last_source_ms) {
+                            trace::emit(trace::Drop, trace::Correction, item.stamp.frame_id, 0, 4);
+                            if (options.benchmark_seconds)
+                                writer.push({{"type", "late_detection"},
+                                             {"frame_id", item.stamp.frame_id},
+                                             {"sequence", item.stamp.sequence},
+                                             {"arrival_ms", item.stamp.arrival_ms},
+                                             {"completed_ms", item.completed_ms}});
+                            ++late_results;
+                            continue;
+                        }
+                        trace::Scope tracking(trace::Track);
                         auto snapshot = tracker.updateAt(item.result.detections, item.stamp.sequence, item.stamp.timestamp_ms);
-                        watermark = item.stamp.sequence; last_source_ms = item.stamp.timestamp_ms; ++accepted;
+                        tracking.end();
+                        snapshot.trace_frame_id = item.stamp.frame_id;
+                        snapshot.trace_arrival_ms = item.stamp.arrival_ms;
+                        watermark = item.stamp.sequence;
+                        last_source_ms = item.stamp.timestamp_ms;
+                        ++accepted;
                         {
                             // 输出线程只拷贝不可变快照，再自行预测；不共享可变 tracker。
                             std::lock_guard<std::mutex> lock(snapshot_mutex);
                             snapshots.push_back(std::move(snapshot));
-                            if (snapshots.size() > 64) snapshots.pop_front();
+                            trace::emit(trace::Instant, trace::Correction, item.stamp.frame_id);
+                            if (snapshots.size() > 64)
+                                snapshots.pop_front();
                         }
-                        Json values = Json::array(); for (const auto& d : item.result.detections) values.push_back(detectionJson(d));
-                        writer.push({{"type", "detection"}, {"sequence", item.stamp.sequence}, {"timestamp_ms", item.stamp.timestamp_ms},
-                            {"completed_ms", item.completed_ms}, {"worker", item.worker}, {"detections", values},
-                            {"preprocess_ms", item.result.preprocess_ms}, {"infer_ms", item.result.infer_ms},
-                            {"postprocess_ms", item.result.postprocess_ms}, {"stabilization", stabilizationJson(item.stabilization)}});
+                        Json values = Json::array();
+                        for (const auto &d : item.result.detections)
+                            values.push_back(detectionJson(d));
+                        writer.push({{"type", "detection"},
+                                     {"frame_id", item.stamp.frame_id},
+                                     {"arrival_ms", item.stamp.arrival_ms},
+                                     {"sequence", item.stamp.sequence},
+                                     {"timestamp_ms", item.stamp.timestamp_ms},
+                                     {"completed_ms", item.completed_ms},
+                                     {"worker", item.worker},
+                                     {"detections", values},
+                                     {"preprocess_ms", item.result.preprocess_ms},
+                                     {"infer_ms", item.result.infer_ms},
+                                     {"postprocess_ms", item.result.postprocess_ms},
+                                     {"stabilization", stabilizationJson(item.stabilization)}});
                     }
                 }
-            } catch (const std::exception& e) { fail(e.what()); }
+            } catch (const std::exception& e) {
+                fail(e.what());
+            }
         });
         // 线程只在启动时创建。按值捕获 i，保证每个线程始终使用自己的 engine/processor。
-        // 三个线程竞争同一最新帧槽，take() 每次只把一帧交给一个 Worker，不广播推理。
-        for (int i = 0; i < worker_count; ++i) workers.emplace_back([&, i] {
-            try {
-                while (auto frame = infer_frames.take()) {
-                    if (stop.load()) break;
-                    const auto stamp = frame->stamp;
-                    const double before = nowMs();
-                    // MPP 输出带共享租约的 NV12。
-                    // prepare 内 RGA 用 IM_SYNC，返回时独立 RGB 已就绪。
-                    const auto stabilization=frame->stabilization;
-                    auto input = processors[i]->prepareNv12(frame->image,stabilization.roi);
-                    const double prepare = nowMs() - before;
-                    // 归还推理侧 NV12 源租约；另一输出侧若仍持有该 Surface，它仍不可复用。
-                    // input 继续持有 RGB 租约，覆盖后面的 RKNN 绑定、执行和后处理。
-                    frame.reset();
-                    if (callbacks.before_infer) callbacks.before_infer(i);
-                    auto result = engines[i]->infer(input, stamp.sequence); result.preprocess_ms = prepare;
-                    const double completed = nowMs();
-                    ++inference_count; preprocess_ms.add(prepare); infer_ms.add(result.infer_ms); postprocess_ms.add(result.postprocess_ms);
-                    result_age_ms.add(completed - stamp.timestamp_ms);
-                    results.push({stamp, std::move(result), completed, i, stabilization});
+        // 各 Worker 竞争同一推理队列。take() 在锁内分配派发序号，每帧只交给一个 Worker。
+        for (int i = 0; i < worker_count; ++i)
+            workers.emplace_back([&, i] {
+                trace::thread(static_cast<trace::Lane>(trace::Worker0 + i));
+                try {
+                    if (options.affinity) {
+                        cpu_set_t cpus;
+                        CPU_ZERO(&cpus);
+                        CPU_SET(4 + i, &cpus);
+                        if (pthread_setaffinity_np(pthread_self(), sizeof(cpus), &cpus))
+                            throw std::runtime_error("worker affinity failed");
+                    }
+                    for (;;) {
+                        trace::Scope waiting(trace::WorkerWait, 0);
+                        auto frame = infer_frames.take();
+                        waiting.end();
+                        if (!frame)
+                            break;
+                        trace::frame(frame->stamp.frame_id);
+                        if (stop.load()) {
+                            trace::emit(trace::Drop, trace::Detection, frame->stamp.frame_id, 0, 2);
+                            break;
+                        }
+                        trace::Scope task(trace::WorkerTask);
+                        const auto stamp = frame->stamp;
+                        const double before = nowMs();
+                        // MPP 输出带共享租约的 NV12。
+                        // prepare 内 RGA 用 IM_SYNC，返回时独立 RGB 已就绪。
+                        const auto stabilization = frame->stabilization;
+                        auto input = processors[i]->prepareNv12(frame->image, stabilization.roi);
+                        const double prepare = nowMs() - before;
+                        // 归还推理侧 NV12 源租约；另一输出侧若仍持有该 Surface，它仍不可复用。
+                        // input 继续持有 RGB 租约，覆盖后面的 RKNN 绑定、执行和后处理。
+                        frame.reset();
+                        if (callbacks.before_infer)
+                            callbacks.before_infer(i);
+                        auto result = engines[i]->infer(input, stamp.sequence);
+                        result.preprocess_ms = prepare;
+                        const double completed = nowMs();
+                        trace::emit(trace::Instant, trace::Detection, stamp.frame_id);
+                        ++inference_count;
+                        preprocess_ms.add(prepare);
+                        infer_ms.add(result.infer_ms);
+                        postprocess_ms.add(result.postprocess_ms);
+                        result_age_ms.add(completed -
+                                          stamp.latencyOrigin(options.unpaced));
+                        std::unique_lock<std::mutex> order(order_mutex, std::defer_lock);
+                        if (options.ordered) {
+                            trace::Scope reorder(trace::Reorder);
+                            order.lock();
+                            order_changed.wait(order,
+                                               [&] { return stop || stamp.dispatch == next_dispatch; });
+                            if (stop) {
+                                trace::emit(trace::Drop, trace::Correction, stamp.frame_id, 0, 2);
+                                break;
+                            }
+                        }
+                        results.push({stamp, std::move(result), completed, i, stabilization});
+                        if (options.ordered) {
+                            ++next_dispatch;
+                            order.unlock();
+                            order_changed.notify_all();
+                        }
+                    }
+                } catch (const std::exception &e) {
+                    fail(e.what());
                 }
-            } catch (const std::exception& e) { fail(e.what()); }
-            // 只有最后一个 Worker 退出才关闭结果队列，让校正线程收完已完成结果。
-            if (--remaining_workers == 0) results.finish();
-        });
+                // 只有最后一个 Worker 退出才关闭结果队列，让校正线程收完已完成结果。
+                if (--remaining_workers == 0)
+                    results.finish();
+            });
         decode_thread = std::thread([&] {
+            trace::thread(trace::Decoder);
             try {
                 double last_submit = -1;
                 while (auto packet = packets.take()) {
-                    if (stop.load()) break;
+                    trace::frame(packet->stamp.frame_id);
+                    if (stop.load()) {
+                        trace::emit(trace::Drop, trace::Decode, packet->stamp.frame_id, 0, 2);
+                        break;
+                    }
                     // decode 返回前确认 MPP 完成；之后压缩输入可归还固定 DMA 包池。
                     // 返回的 NV12 则由独立 Surface owner 继续保护，两种占用互不捆绑。
-                    auto frame = decoder.decode(*packet); packet.reset();
-                    if (!frame) { ++pool_dropped; continue; }
-                    ++decoded; decode_ms.add(frame->decode_ms);
+                    trace::Scope decode(trace::Decode);
+                    auto frame = decoder.decode(*packet);
+                    decode.end();
+                    packet.reset();
+                    if (!frame) {
+                        trace::emit(trace::Drop, trace::Decode, trace::currentFrame(), 0, 3);
+                        ++pool_dropped;
+                        continue;
+                    }
+                    ++decoded;
+                    decode_ms.add(frame->decode_ms);
                     if (options.stabilize) {
+                        trace::Scope stabilization_span(trace::Stabilize);
                         const double previous_time=stabilizer.previousTimestamp();
                         const auto mask_snapshot=snapshotAt(previous_time);
                         const auto excluded=mask_snapshot ? mask_snapshot->predictAt(previous_time,options.max_predict_ms,800,600)
                                                           : std::vector<TrackedDetection>{};
                         auto info=stabilizer.update(frame->image,frame->stamp.timestamp_ms,excluded);
                         info.mask_target_timestamp_ms=previous_time;
-                        if (mask_snapshot) info.mask_source_timestamp_ms=mask_snapshot->timestamp_ms;
+                        if (mask_snapshot)
+                            info.mask_source_timestamp_ms = mask_snapshot->timestamp_ms;
                         frame->stabilization=info;
-                        ++stabilization_frames; stabilization_valid+=info.valid;
-                        stabilization_clamped+=info.clamped; stabilization_reset+=info.reference_reset;
-                        stabilize_ms.add(info.total_ms); gray_ms.add(info.gray_ms); motion_ms.add(info.motion_ms);
+                        ++stabilization_frames;
+                        stabilization_valid += info.valid;
+                        stabilization_clamped+=info.clamped;
+                        stabilization_reset += info.reference_reset;
+                        stabilize_ms.add(info.total_ms);
+                        gray_ms.add(info.gray_ms);
+                        motion_ms.add(info.motion_ms);
                     }
                     if (last_submit < 0 || options.detect_fps == 0 || frame->stamp.timestamp_ms - last_submit >= 1000 / options.detect_fps) {
                         // 这里只复制帧描述/shared_ptr，不复制 NV12 像素。后面移交输出侧后，
                         // 同一 Surface 的两路只读消费者分别归还自己的 owner。
-                        last_submit = frame->stamp.timestamp_ms; infer_frames.put(*frame);
-                    } else ++detect_rate_skipped;
+                        last_submit = frame->stamp.timestamp_ms;
+                        infer_frames.put(*frame);
+                    } else {
+                        trace::emit(trace::Drop, trace::Detection, frame->stamp.frame_id, 0, 5);
+                        ++detect_rate_skipped;
+                    }
                     output_frames.put(std::move(*frame));
                 }
-            } catch (const std::exception& e) { fail(e.what()); }
+            } catch (const std::exception& e) {
+                fail(e.what());
+            }
             // 正常 EOF 保留最后的等待帧；与主动停止时 close() 丢弃等待项的语义不同。
-            infer_frames.finish(); output_frames.finish();
+            infer_frames.finish();
+            output_frames.finish();
         });
         capture_thread = std::thread([&] {
+            trace::thread(trace::Camera);
             try {
                 while (!stop.load()) {
                     // CameraSource 已轮换 DMA-BUF 并 QBUF；队列保留出队压缩包租约。
-                    auto packet = source.next(stop); if (!packet) break;
+                    auto packet = source.next(stop);
+                    if (!packet)
+                        break;
+                    capture_last = packet->stamp.arrival_ms;
+                    if (!capture_origin)
+                        capture_origin = packet->stamp.arrival_ms;
+                    const double age = (packet->stamp.arrival_ms - capture_origin) / 1000;
+                    if (age >= options.warmup_seconds &&
+                        (!options.benchmark_seconds ||
+                         age < options.warmup_seconds + options.benchmark_seconds))
+                        ++window_inputs;
                     packets.put(std::move(*packet));
+                    if (options.benchmark_seconds &&
+                        age >= options.warmup_seconds + options.benchmark_seconds)
+                        break;
                 }
-            } catch (const std::exception& e) { fail(e.what()); }
+            } catch (const std::exception& e) {
+                fail(e.what());
+            }
             packets.finish();
         });
         // 调用线程独立消费输出帧，不等待当前帧的检测完成，以保持视频输出及时。
         if (options.preview) cv::namedWindow("RK3588 camera_live", cv::WINDOW_AUTOSIZE);
+        bool eof = false;
         while (!stop.load()) {
             if (signal_stop && *signal_stop) break;
             auto frame = output_frames.take(false);
@@ -367,12 +574,19 @@ Json runLive(FrameSource& source, const AppConfig& config, const LiveOptions& op
                         cv::getWindowProperty("RK3588 camera_live", cv::WND_PROP_VISIBLE) < 1) break;
                 }
                 // 在同一锁内检查关闭状态和等待项，避免另一个完成标记使最后一帧丢失。
-                if (output_frames.finished()) break;
+                if (output_frames.finished()) {
+                    eof = true;
+                    break;
+                }
                 std::this_thread::sleep_for(std::chrono::milliseconds(1)); continue;
             }
             const auto stamp = frame->stamp;
+            trace::frame(stamp.frame_id);
             const auto snapshot=snapshotAt(stamp.timestamp_ms);
             const auto stabilization=frame->stabilization;
+            trace::emit(trace::Instant, trace::Snapshot, stamp.frame_id, 0,
+                        snapshot ? snapshot->trace_frame_id : 0);
+            trace::Scope render(trace::Render);
             auto image = renderer.convert(*frame);
             // RGA 同步转换完成后归还输出侧 NV12 租约；CPU 只在独立 BGR 上画框。
             frame.reset();
@@ -396,21 +610,45 @@ Json runLive(FrameSource& source, const AppConfig& config, const LiveOptions& op
             // 不能将该 Mat 留给异步消费者并立即复用 Renderer 双缓冲。
             renderer.finish();
             const bool stream_submitted = stream && stream->submit(renderer, stamp);
+            render.end();
+            trace::emit(trace::Instant, trace::Output, stamp.frame_id);
+            if (stream)
+                trace::emit(trace::Instant, trace::StreamSubmit, stamp.frame_id, 0, stream_submitted);
             const double output_time = nowMs();
-            const double latency = output_time - stamp.timestamp_ms;
+            const double latency = output_time - stamp.latencyOrigin(options.unpaced);
             output_latency_ms.add(latency);
-            if (snapshot) { correction_age_ms.add(output_time - snapshot->timestamp_ms); prediction_ms.add(stamp.timestamp_ms - snapshot->timestamp_ms); }
-            else ++empty_snapshot_frames;
+            if (snapshot) {
+                correction_age_ms.add(
+                    output_time - (options.unpaced ? snapshot->trace_arrival_ms : snapshot->timestamp_ms));
+                prediction_ms.add(stamp.timestamp_ms - snapshot->timestamp_ms);
+            } else
+                ++empty_snapshot_frames;
             if (!output_count) first_output_ts = stamp.timestamp_ms;
             last_output_ts = stamp.timestamp_ms;
-            writer.push({{"type", "frame"}, {"frame_index", output_count}, {"sequence", stamp.sequence}, {"timestamp_ms", stamp.timestamp_ms},
-                {"raw_timestamp_ms", stamp.raw_timestamp_ms}, {"timestamp_clock", stamp.clock}, {"timestamp_flags", stamp.flags},
-                {"width", 800}, {"height", 600}, {"output_monotonic_ms", output_time}, {"output_latency_ms", latency},
-                {"stream_submitted", stream_submitted}, {"stabilization", stabilizationJson(stabilization)},
-                {"corrected_from_sequence", snapshot ? snapshot->source_sequence : -1},
-                {"correction_timestamp_ms", snapshot ? Json(snapshot->timestamp_ms) : Json(nullptr)},
-                {"prediction_ms", snapshot ? Json(stamp.timestamp_ms - snapshot->timestamp_ms) : Json(nullptr)},
-                {"correction_age_ms", snapshot ? Json(output_time - snapshot->timestamp_ms) : Json(nullptr)}, {"tracks", track_rows}});
+            writer.push({{"type", "frame"},
+                         {"frame_id", stamp.frame_id},
+                         {"arrival_ms", stamp.arrival_ms},
+                         {"frame_index", output_count},
+                         {"sequence", stamp.sequence},
+                         {"timestamp_ms", stamp.timestamp_ms},
+                         {"raw_timestamp_ms", stamp.raw_timestamp_ms},
+                         {"timestamp_clock", stamp.clock},
+                         {"timestamp_flags", stamp.flags},
+                         {"width", 800},
+                         {"height", 600},
+                         {"output_monotonic_ms", output_time},
+                         {"output_latency_ms", latency},
+                         {"stream_submitted", stream_submitted},
+                         {"stabilization", stabilizationJson(stabilization)},
+                         {"corrected_from_sequence", snapshot ? snapshot->source_sequence : -1},
+                         {"correction_timestamp_ms", snapshot ? Json(snapshot->timestamp_ms) : Json(nullptr)},
+                         {"prediction_ms",
+                          snapshot ? Json(stamp.timestamp_ms - snapshot->timestamp_ms) : Json(nullptr)},
+                         {"correction_age_ms",
+                          snapshot ? Json(output_time - (options.unpaced ? snapshot->trace_arrival_ms
+                                                                         : snapshot->timestamp_ms))
+                                   : Json(nullptr)},
+                         {"tracks", track_rows}});
             ++output_count;
             if (output_count == 1 || output_count % 30 == 0) {
                 auto row = resources.sample(); row["type"] = "resource"; row["frame_count"] = output_count;
@@ -420,36 +658,74 @@ Json runLive(FrameSource& source, const AppConfig& config, const LiveOptions& op
             if ((options.max_frames && output_count >= options.max_frames) || key == 27 || key == 'q' || key == 'Q' ||
                 (options.preview && cv::getWindowProperty("RK3588 camera_live", cv::WND_PROP_VISIBLE) < 1)) break;
         }
+        if (!eof)
+            stopNewWork();
     } catch (const std::exception& e) { fail(e.what()); }
     // 停提交 → 等线程及已开始任务退出 → 结束 CPU 访问。函数返回后的 RAII 析构
     // 再清理 MPP/RKNN 注册和 Context；底层 allocation 由剩余共享所有者延长存活期。
-    stopNewWork(); join(); stabilizer.finish(); renderer.finish();
+    join();
+    packets.discardAfterJoin();
+    stabilizer.finish();
+    renderer.finish();
     if (stream) stream->stop();
     if (options.preview) cv::destroyAllWindows();
     const double elapsed = nowMs() - start;
     rusage usage{}; getrusage(RUSAGE_SELF, &usage);
     auto cpuMs = [](const rusage& r) { return r.ru_utime.tv_sec * 1000.0 + r.ru_utime.tv_usec / 1000.0 + r.ru_stime.tv_sec * 1000.0 + r.ru_stime.tv_usec / 1000.0; };
-    Json summary{{"type", "summary"}, {"status", "completed"}, {"error", ""}, {"npu_mode", options.npu_mode},
-        {"frame_count", output_count}, {"decoded_count", decoded.load()}, {"inference_count", inference_count.load()},
-        {"accepted_results", accepted.load()}, {"late_results_dropped", late_results.load()}, {"decoded_pool_dropped", pool_dropped.load()},
-        {"packet_pending_dropped", packets.dropped()}, {"inference_pending_dropped", infer_frames.dropped()},
-        {"output_pending_dropped", output_frames.dropped()}, {"detect_rate_skipped", detect_rate_skipped.load()},
-        {"packet_shutdown_discarded", packets.cancelled()}, {"inference_shutdown_discarded", infer_frames.cancelled()},
-        {"output_shutdown_discarded", output_frames.cancelled()},
-        {"empty_snapshot_frames", empty_snapshot_frames}, {"result_queue_peak", results.peak()}, {"json_queue_peak", writer.peak()},
-        {"elapsed_ms", elapsed}, {"output_fps", elapsed > 0 ? output_count * 1000 / elapsed : 0},
-        {"output_timeline_fps", last_output_ts > first_output_ts ? (output_count - 1) * 1000 / (last_output_ts - first_output_ts) : 0},
-        {"inference_fps", elapsed > 0 ? inference_count.load() * 1000 / elapsed : 0},
-        {"cpu_percent", elapsed > 0 ? (cpuMs(usage) - cpuMs(usage_start)) * 100 / elapsed : 0},
-        {"resources", resources.json()}, {"source", source.counters()},
-        {"stabilization", {{"enabled",options.stabilize},{"frames",stabilization_frames},
-            {"valid_frames",stabilization_valid},{"lost_frames",stabilization_frames-stabilization_valid-stabilization_reset},
-            {"reference_resets",stabilization_reset},{"clamped_frames",stabilization_clamped},
-            {"total",stabilize_ms.json()},{"gray",gray_ms.json()},{"motion",motion_ms.json()}}},
-        {"stream", stream ? stream->stats() : Json{{"status", "disabled"}}},
-        {"timing", {{"decode", decode_ms.json()}, {"preprocess", preprocess_ms.json()}, {"infer", infer_ms.json()},
-            {"postprocess", postprocess_ms.json()}, {"capture_to_result", result_age_ms.json()}, {"output_latency", output_latency_ms.json()},
-            {"correction_age", correction_age_ms.json()}, {"prediction", prediction_ms.json()}}}};
+    Json summary{{"type", "summary"},
+                 {"status", "completed"},
+                 {"error", ""},
+                 {"npu_mode", options.npu_mode},
+                 {"frame_count", output_count},
+                 {"capture_origin_ms", capture_origin},
+                 {"capture_last_ms", capture_last},
+                 {"window_inputs", window_inputs},
+                 {"decoded_count", decoded.load()},
+                 {"inference_count", inference_count.load()},
+                 {"accepted_results", accepted.load()},
+                 {"late_results_dropped", late_results.load()},
+                 {"decoded_pool_dropped", pool_dropped.load()},
+                 {"packet_pending_dropped", packets.dropped()},
+                 {"inference_pending_dropped", infer_frames.dropped()},
+                 {"output_pending_dropped", output_frames.dropped()},
+                 {"detect_rate_skipped", detect_rate_skipped.load()},
+                 {"packet_shutdown_discarded", packets.cancelled()},
+                 {"inference_shutdown_discarded", infer_frames.cancelled()},
+                 {"output_shutdown_discarded", output_frames.cancelled()},
+                 {"empty_snapshot_frames", empty_snapshot_frames},
+                 {"result_queue_peak", results.peak()},
+                 {"json_queue_peak", writer.peak()},
+                 {"elapsed_ms", elapsed},
+                 {"output_fps", elapsed > 0 ? output_count * 1000 / elapsed : 0},
+                 {"output_timeline_fps", last_output_ts > first_output_ts
+                                             ? (output_count - 1) * 1000 / (last_output_ts - first_output_ts)
+                                             : 0},
+                 {"inference_fps", elapsed > 0 ? inference_count.load() * 1000 / elapsed : 0},
+                 {"cpu_percent", elapsed > 0 ? (cpuMs(usage) - cpuMs(usage_start)) * 100 / elapsed : 0},
+                 {"resources", resources.json()},
+                 {"source", source.counters()},
+                 {"stabilization",
+                  {{"enabled", options.stabilize},
+                   {"frames", stabilization_frames},
+                   {"valid_frames", stabilization_valid},
+                   {"lost_frames", stabilization_frames - stabilization_valid - stabilization_reset},
+                   {"reference_resets", stabilization_reset},
+                   {"clamped_frames", stabilization_clamped},
+                   {"total", stabilize_ms.json()},
+                   {"gray", gray_ms.json()},
+                   {"motion", motion_ms.json()}}},
+                 {"stream", stream ? stream->stats() : Json{{"status", "disabled"}}},
+                 {"timing",
+                  {{"decode", decode_ms.json()},
+                   {"preprocess", preprocess_ms.json()},
+                   {"infer", infer_ms.json()},
+                   {"postprocess", postprocess_ms.json()},
+                   {"capture_to_result", result_age_ms.json()},
+                   {"output_latency", output_latency_ms.json()},
+                   {"correction_age", correction_age_ms.json()},
+                   {"prediction", prediction_ms.json()}}}};
+    if (trace::enabled())
+        summary["rknn"] = engines.front()->runtimeInfo();
     { std::lock_guard<std::mutex> lock(error_mutex); if (!error.empty()) { summary["status"] = "error"; summary["error"] = error; }
       else if (signal_stop && *signal_stop) summary["status"] = "interrupted"; }
     // 写入失败时队列可能已满，舍弃待写记录后收尾；此时以 stderr 汇总为准，

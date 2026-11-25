@@ -72,13 +72,18 @@ struct EncodeFramePool::Slot {
         access.finish();
     }
 };
-EncodeFramePool::EncodeFramePool() { for (auto& slot : slots_) slot = std::make_shared<Slot>(); }
+EncodeFramePool::EncodeFramePool() {
+    trace::emit(trace::Counter, trace::PoolCapacity, 0, 0, 3, trace::EncodePool);
+    for (auto &slot : slots_)
+        slot = std::make_shared<Slot>();
+}
 std::optional<Nv12FrameView> EncodeFramePool::acquire() {
     // 仅输出生产者调用 acquire；编码 Worker 只归还租约，不参与选槽。
     for (auto& slot : slots_) if (slot->lease.expired() && slot->dma->healthy) {
-        auto owner = std::make_shared<FrameLease>(slot);
-        slot->lease = owner;
-        return Nv12FrameView{owner, slot->dma, 800, 600, 800, 608, false};
+            auto owner = std::make_shared<FrameLease>(
+                trace::lease(slot, trace::EncodePool, &slot - slots_.data(), trace::currentFrame()));
+            slot->lease = owner;
+            return Nv12FrameView{owner, slot->dma, 800, 600, 800, 608, false};
     }
     return {};
 }
@@ -294,7 +299,8 @@ uint64_t MpegTsOutput::errors() const { return impl_->failed; }
 
 struct StreamOutput::Impl {
     EncodeFramePool pool;
-    LatestSlot<StreamFrame> pending;
+    LatestSlot<StreamFrame> pending{trace::EncodeQueue,
+                                    [](const StreamFrame &f) { return f.stamp.frame_id; }};
     std::atomic<bool> enabled{true};
     std::thread worker;
     mutable std::mutex mutex;
@@ -302,40 +308,57 @@ struct StreamOutput::Impl {
     uint64_t submitted = 0, no_buffer = 0, encoded = 0, keys = 0, sent = 0, errors = 0;
     Histogram conversion, encoding, latency;
     double start = nowMs();
-    void run(uint16_t port, int bitrate, int timeout, const std::function<void()>& before) {
+    void run(uint16_t port, int bitrate, int timeout, const std::function<void()>& before, bool unpaced) {
+        trace::thread(trace::Encoder);
+        uint64_t encoding_frame = 0;
         try {
             MppH264Encoder encoder(bitrate, timeout);
             MpegTsOutput output(port);
             { std::lock_guard<std::mutex> lock(mutex); status = "running"; }
             bool force_idr = false;
             while (auto frame = pending.take()) {
+                encoding_frame = frame->stamp.frame_id;
+                trace::frame(encoding_frame);
+                trace::Scope encode(trace::Encode);
                 if (before) before();
                 const double begin = nowMs();
                 const auto& packet = encoder.encode(*frame, force_idr);
+                encode.end();
+                trace::emit(trace::Instant, trace::Encoded, encoding_frame);
+                // MPP 已归还编码结果。后续发送失败记在传输侧，编码终态只记一次。
+                encoding_frame = 0;
                 const double completed = nowMs();
                 force_idr = !output.write(packet);
                 std::lock_guard<std::mutex> lock(mutex);
                 ++encoded; keys += packet.keyframe; sent = output.bytes(); errors = output.errors();
-                encoding.add(completed - begin); latency.add(completed - frame->stamp.timestamp_ms);
+                encoding.add(completed - begin); latency.add(completed - frame->stamp.latencyOrigin(unpaced));
             }
             std::lock_guard<std::mutex> lock(mutex); status = "stopped";
         } catch (const std::exception& e) {
+            if (encoding_frame) trace::emit(trace::Error, trace::Encoded, encoding_frame);
             enabled.store(false); pending.close();
             std::lock_guard<std::mutex> lock(mutex); status = "error"; error = e.what();
             std::cerr << "stream disabled: " << error << '\n';
         }
     }
 };
-StreamOutput::StreamOutput(uint16_t port, int bitrate, int timeout, std::function<void()> before)
+StreamOutput::StreamOutput(uint16_t port, int bitrate, int timeout, std::function<void()> before, bool unpaced)
     : impl_(std::make_unique<Impl>()) {
-    impl_->worker = std::thread([this, port, bitrate, timeout, before = std::move(before)] { impl_->run(port, bitrate, timeout, before); });
+    impl_->worker = std::thread([this, port, bitrate, timeout, before = std::move(before), unpaced] {
+        impl_->run(port, bitrate, timeout, before, unpaced);
+    });
 }
 StreamOutput::~StreamOutput() { stop(); }
 bool StreamOutput::submit(Renderer& renderer, const Stamp& stamp) {
     auto& i = *impl_;
     if (!i.enabled.load()) return false;
     auto image = i.pool.acquire();
-    if (!image) { std::lock_guard<std::mutex> lock(i.mutex); ++i.no_buffer; return false; }
+    if (!image) {
+        trace::emit(trace::Drop, trace::Encoded, stamp.frame_id, 0, 3);
+        std::lock_guard<std::mutex> lock(i.mutex);
+        ++i.no_buffer;
+        return false;
+    }
     const double begin = nowMs();
     renderer.convertForEncode(*image);
     const bool ok = i.pending.put(StreamFrame{std::move(*image), stamp});

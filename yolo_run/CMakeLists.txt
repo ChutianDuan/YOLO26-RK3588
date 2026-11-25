@@ -20,10 +20,13 @@ pkg_check_modules(SYSTEM_AV REQUIRED IMPORTED_TARGET libavformat libavcodec liba
 set(YOLO_CORE_OPENCV_LIBS ${OpenCV_LIBS})
 find_package(OpenCV REQUIRED CONFIG COMPONENTS highgui
     PATHS /usr/lib/aarch64-linux-gnu/cmake/opencv4 NO_DEFAULT_PATH)
+option(YOLO_ENABLE_TRACE "Build single-camera binary trace support" ON)
 add_library(yolo_core
+    profiling/trace.cpp profiling/sampler.cpp
     config/app_config.cpp image/dma_buffer.cpp image/image_processing.cpp model/yolo_engine.cpp model/yolo_postprocess.cpp
     tracking/byte_tracker.cpp video/optical_flow_tracker.cpp video/frame_stabilizer.cpp
     video/video_inference.cpp video/video_inference_detail.cpp io/result_writer.cpp)
+target_compile_definitions(yolo_core PUBLIC YOLO_ENABLE_TRACE=$<BOOL:${YOLO_ENABLE_TRACE}>)
 target_include_directories(yolo_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(yolo_core PUBLIC Rockchip::RKNN Rockchip::RGA ${YOLO_CORE_OPENCV_LIBS} nlohmann_json::nlohmann_json Threads::Threads)
 target_compile_options(yolo_core PRIVATE -Wall -Wextra -Wpedantic)

@@ -50,7 +50,7 @@ class StreamOutput {
 public:
     // Optional callback is only used by test/ executables for fault injection.
     StreamOutput(uint16_t port, int bitrate, int timeout_ms,
-                 std::function<void()> before_encode = {});
+                 std::function<void()> before_encode = {}, bool unpaced = false);
     ~StreamOutput();
     bool submit(Renderer&, const Stamp&);
     void stop();

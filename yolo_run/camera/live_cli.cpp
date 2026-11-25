@@ -1,13 +1,17 @@
+#include "camera/live_media.h"
 #include "camera/live_pipeline.h"
+#include "profiling/trace.h"
 #include <charconv>
 #include <cmath>
 #include <csignal>
 #include <fstream>
 #include <iostream>
 #include <map>
-#include <set>
-#include <unistd.h>
 #include <opencv2/core.hpp>
+#include <set>
+#include <sstream>
+#include <sys/utsname.h>
+#include <unistd.h>
 
 namespace {
 volatile sig_atomic_t stopped = 0;
@@ -34,24 +38,40 @@ int yolo::live::runLiveCli(int argc, char** argv, const LiveCallbacks& callbacks
     try {
         using namespace yolo;
         using namespace yolo::live;
-        std::set<std::string> keys{"--device", "--config", "--model", "--output", "--max-frames", "--preview", "--decoder",
-            "--npu-mode", "--detect-fps", "--max-predict-ms", "--replay", "--stream", "--stream-port", "--stream-bitrate",
-            "--stabilize", "--stabilize-alpha"};
+        std::set<std::string> keys{"--device",          "--config",          "--model",
+                                   "--output",          "--max-frames",      "--preview",
+                                   "--decoder",         "--npu-mode",        "--detect-fps",
+                                   "--max-predict-ms",  "--replay",          "--stream",
+                                   "--stream-port",     "--stream-bitrate",  "--stabilize",
+                                   "--stabilize-alpha", "--trace-dir",       "--trace-capacity",
+                                   "--sample-ms",       "--core-masks",      "--infer-depth",
+                                   "--surface-count",   "--queue-policy",    "--replay-paced",
+                                   "--worker-affinity", "--ordered-results", "--cpu-copy",
+                                   "--packet-spsc",     "--packet-fifo",     "--benchmark-seconds",
+                                   "--warmup-seconds"};
         std::map<std::string, std::string> args;
         for (int i = 1; i < argc; ++i) {
             const std::string key(argv[i]);
             if (key == "--help" || key == "-h") {
-                std::cout << "Usage: camera_live [--device DEVICE | --replay manifest.jsonl]\n"
-                    "  [--preview on|off] [--decoder mpp] [--npu-mode default|all|split]\n"
-                    "  [--detect-fps 0] [--max-predict-ms 500] [--max-frames 0]\n"
-                    "  [--model MODEL.rknn] [--config config.yaml] [--output NEW.jsonl]\n"
-                    "  [--stream on|off] [--stream-port 12340] [--stream-bitrate 2000000]\n"
-                    "  [--stabilize on|off] [--stabilize-alpha 0.15]\n"
-                    "Stabilization defaults on: 720x540 ROI zoomed to 800x600; boxes use stabilized coordinates.\n"
-                    "800x600 MJPEG, request 30 FPS; RGB model size/labels come from --config.\n"
-                    "Without --config, use the legacy 800x608 INT8 model. --model overrides config.\n"
-                    "NPU mode defaults to split (3 independent single-core workers); camera_live.json may override it.\n"
-                    "Preview defaults on; use off without a graphical desktop.\n";
+                std::cout
+                    << "Usage: camera_live [--device DEVICE | --replay manifest.jsonl]\n"
+                       "  [--preview on|off] [--decoder mpp] [--npu-mode default|all|split]\n"
+                       "  [--detect-fps 0] [--max-predict-ms 500] [--max-frames 0]\n"
+                       "  [--model MODEL.rknn] [--config config.yaml] [--output NEW.jsonl]\n"
+                       "  [--stream on|off] [--stream-port 12340] [--stream-bitrate 2000000]\n"
+                       "  [--stabilize on|off] [--stabilize-alpha 0.15]\n"
+                       "  [--trace-dir NEW_DIR] [--trace-capacity RECORDS_PER_THREAD] [--core-masks 1,2,4]\n"
+                       "  [--infer-depth 1..16] [--surface-count 3..12] [--queue-policy latest|oldest|fifo]\n"
+                       "  [--replay-paced on|off] [--worker-affinity on|off] [--ordered-results on|off]\n"
+                       "  [--cpu-copy on|off] [--packet-spsc on|off] [--packet-fifo on|off]\n"
+                       "  [--sample-ms 250] [--benchmark-seconds N] [--warmup-seconds N]\n"
+                       "Stabilization defaults on: 720x540 ROI zoomed to 800x600; boxes use stabilized "
+                       "coordinates.\n"
+                       "800x600 MJPEG, request 30 FPS; RGB model size/labels come from --config.\n"
+                       "Without --config, use the legacy 800x608 INT8 model. --model overrides config.\n"
+                       "NPU mode defaults to split (3 independent single-core workers); camera_live.json may "
+                       "override it.\n"
+                       "Preview defaults on; use off without a graphical desktop.\n";
                 return 0;
             }
             if (!keys.count(key) || i + 1 == argc || args.count(key)) throw std::runtime_error("invalid/missing/repeated argument: " + key);
@@ -101,8 +121,76 @@ int yolo::live::runLiveCli(int argc, char** argv, const LiveCallbacks& callbacks
         if (sigaction(SIGINT, &action, nullptr) || sigaction(SIGTERM, &action, nullptr)) throw std::runtime_error("sigaction failed");
         cv::setNumThreads(config.opencv_threads);
         // 源对象覆盖 runLive 的整个调用期；返回前已 join 所有使用它的线程。
-        auto source = args.count("--replay") ? replaySource(args.at("--replay")) : cameraSource(get("--device", "/dev/v4l/by-id/usb-Generic_USB_Camera_200901010001-video-index0"));
+        if (args.count("--core-masks")) {
+            const auto& masks = args.at("--core-masks");
+            if (masks.empty() || masks.back() == ',') throw std::runtime_error("missing core mask");
+            std::istringstream list(masks);
+            std::string mask;
+            while (std::getline(list, mask, ',')) {
+                const auto m = integer(mask);
+                if (m != 1 && m != 2 && m != 3 && m != 4 && m != 7)
+                    throw std::runtime_error("unsupported core mask");
+                options.masks.push_back(static_cast<int>(m));
+            }
+            if (options.masks.empty() || options.masks.size() > 3)
+                throw std::runtime_error("expected 1..3 core masks");
+        }
+        options.infer_depth = integer(get("--infer-depth", "1"));
+        options.surface_count = integer(get("--surface-count", "8"));
+        options.queue_policy = get("--queue-policy", "latest");
+        if (!options.infer_depth || options.infer_depth > 16 || options.surface_count < 3 ||
+            options.surface_count > 12 ||
+            (options.queue_policy != "fifo" && options.queue_policy != "latest" &&
+             options.queue_policy != "oldest") ||
+            (options.queue_policy == "latest" && options.infer_depth != 1))
+            throw std::runtime_error("invalid queue policy/depth or pool capacity");
+        options.unpaced = !toggle(get("--replay-paced", "on"));
+        if (options.unpaced && !args.count("--replay"))
+            throw std::runtime_error("unpaced requires replay");
+        options.affinity = toggle(get("--worker-affinity", "off"));
+        options.ordered = toggle(get("--ordered-results", "off"));
+        options.cpu_copy = toggle(get("--cpu-copy", "off"));
+        options.packet_spsc = toggle(get("--packet-spsc", "off"));
+        options.benchmark_seconds = number(get("--benchmark-seconds", "0"));
+        options.warmup_seconds = number(get("--warmup-seconds", "0"));
+        if (options.benchmark_seconds < 0 || options.warmup_seconds < 0)
+            throw std::runtime_error("negative benchmark interval");
+        options.packet_fifo = toggle(get("--packet-fifo", "off"));
+        std::unique_ptr<trace::Session> trace_session;
+        if (integer(get("--sample-ms", "250")) > 60000)
+            throw std::runtime_error("--sample-ms exceeds 60000");
+        if (args.count("--trace-dir"))
+            trace_session = std::make_unique<trace::Session>(args.at("--trace-dir"),
+                                                             integer(get("--trace-capacity", "8192")),
+                                                             integer(get("--sample-ms", "250")));
+        auto source =
+            args.count("--replay")
+                ? replaySource(args.at("--replay"), !options.unpaced)
+                : cameraSource(
+                      get("--device", "/dev/v4l/by-id/usb-Generic_USB_Camera_200901010001-video-index0"));
+        if (trace_session) {
+            utsname machine{};
+            uname(&machine);
+            auto meta = source->info();
+            meta.update({{"model", config.model_path},
+                         {"input_width", config.input_width},
+                         {"input_height", config.input_height},
+                         {"classes", config.num_classes},
+                         {"kernel", machine.release},
+                         {"arch", machine.machine},
+                         {"arguments", args},
+                         {"surface_count", options.surface_count},
+                         {"queue_depth", options.infer_depth},
+                         {"npu_mode", options.npu_mode},
+                         {"preview", options.preview},
+                         {"stream", options.stream},
+                         {"stabilize", options.stabilize}});
+            trace_session->metadata(meta);
+        }
         const auto summary = runLive(*source, config, options, &stopped, callbacks);
+        source.reset();
+        if (trace_session)
+            trace_session->finish(summary);
         std::cerr << summary.dump(2) << '\n';
         return summary.at("status") == "error" ? 1 : 0;
     } catch (const std::exception& e) { std::cerr << "Error: " << e.what() << '\n'; return 1; }

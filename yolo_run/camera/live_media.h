@@ -1,15 +1,17 @@
 #pragma once
-#include <atomic>
+#include "image/image_processing.h"
+#include "profiling/trace.h"
+#include "video/frame_stabilizer.h"
 #include <array>
+#include <atomic>
 #include <condition_variable>
 #include <filesystem>
 #include <functional>
 #include <mutex>
-#include <optional>
-#include <vector>
 #include <nlohmann/json.hpp>
-#include "image/image_processing.h"
-#include "video/frame_stabilizer.h"
+#include <optional>
+#include <stdexcept>
+#include <vector>
 
 namespace yolo::live {
 double nowMs();
@@ -20,6 +22,10 @@ struct Stamp {
     double timestamp_ms = 0, raw_timestamp_ms = 0;
     uint32_t flags = 0;
     std::string clock = "host_monotonic";
+    uint64_t frame_id = 0, dispatch = 0;
+    double arrival_ms = 0;
+    // 不限速回放会提前读到未来的媒体帧，此时端到端耗时从实际到达时间起算。
+    double latencyOrigin(bool unpaced) const { return unpaced ? arrival_ms : timestamp_ms; }
 };
 struct PacketStorage;
 struct EncodedFrame {
@@ -35,7 +41,8 @@ struct EncodedFrame {
 class PacketPool {
 public:
     explicit PacketPool(size_t capacity, size_t slots = 4);
-    std::shared_ptr<PacketStorage> acquire();
+    std::shared_ptr<PacketStorage> acquire(uint64_t frame_id = 0);
+
 private:
     std::vector<std::shared_ptr<PacketStorage>> slots_;
 };
@@ -47,35 +54,103 @@ struct DecodedFrame {
     double decode_ms = 0;
     StabilizationInfo stabilization;
 };
-// 单生产者、单个或多个竞争消费者；只保留最新等待项，不累积视频帧。
+// 有界队列支持竞争消费。满队列时 FIFO 阻塞生产者，替换策略释放最旧等待项。
 // take() 把描述/租约移交给一个消费者；旧等待项被替换不影响已经取走的在途帧。
-// close() 丢弃等待项并唤醒线程；finish() 保留最后一项供正常 EOF 消费。
-template<class T> class LatestSlot {
+// close() 取消所有等待项并唤醒线程。正常 EOF 调用 finish()，允许消费者排空队列。
+template <class T> class LatestSlot {
 public:
+    using Id = uint64_t (*)(const T&);
+    using Dispatch = void (*)(T&, uint64_t);
+    explicit LatestSlot(trace::Stage stage = trace::PacketQueue, Id id = nullptr, size_t capacity = 1,
+                        bool fifo = false, Dispatch dispatch = nullptr)
+        : slots_(capacity), stage_(stage), id_(id), dispatch_(dispatch), fifo_(fifo) {
+        if (!capacity) throw std::invalid_argument("queue capacity must be positive");
+    }
     bool put(T value) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (closed_) { ++cancelled_; return false; }
-        if (value_) ++dropped_;
-        value_ = std::move(value); cv_.notify_one(); return true;
+        auto lock = queueLock(trace::enabled() && id_ ? id_(value) : 0);
+        if (fifo_) cv_.wait(lock, [&] { return closed_ || size_ < slots_.size(); });
+        if (closed_) {
+            ++cancelled_;
+            event(trace::Evict, value, 2);
+            return false;
+        }
+        if (size_ == slots_.size()) {
+            event(trace::Evict, *slots_[head_], 1);
+            pop();
+            ++dropped_;
+        }
+        event(trace::Enter, value, 0);
+        slots_[(head_ + size_) % slots_.size()] = std::move(value);
+        ++size_;
+        cv_.notify_all();
+        return true;
     }
     std::optional<T> take(bool wait = true) {
-        std::unique_lock<std::mutex> lock(mutex_);
-        if (wait) cv_.wait(lock, [&] { return closed_ || value_.has_value(); });
-        if (!value_) return {};
-        auto value = std::move(value_); value_.reset(); return value;
+        auto lock = queueLock();
+        if (wait) cv_.wait(lock, [&] { return closed_ || size_; });
+        if (!size_) return {};
+        auto value = std::move(slots_[head_]);
+        pop();
+        if (dispatch_) dispatch_(*value, ++dispatch_count_);
+        event(trace::Leave, *value, 0);
+        cv_.notify_all();
+        return value;
     }
-    void close() { std::lock_guard<std::mutex> lock(mutex_); closed_ = true; if (value_) ++cancelled_; value_.reset(); cv_.notify_all(); }
-    void finish() { std::lock_guard<std::mutex> lock(mutex_); closed_ = true; cv_.notify_all(); }
-    uint64_t dropped() const { std::lock_guard<std::mutex> lock(mutex_); return dropped_; }
-    uint64_t cancelled() const { std::lock_guard<std::mutex> lock(mutex_); return cancelled_; }
-    bool finished() const { std::lock_guard<std::mutex> lock(mutex_); return closed_ && !value_; }
+    void close() {
+        std::lock_guard<std::mutex> lock(mutex_);
+        closed_ = true;
+        while (size_) {
+            event(trace::Evict, *slots_[head_], 2);
+            pop();
+            ++cancelled_;
+        }
+        cv_.notify_all();
+    }
+    void finish() {
+        std::lock_guard<std::mutex> lock(mutex_);
+        closed_ = true;
+        cv_.notify_all();
+    }
+    uint64_t dropped() const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return dropped_;
+    }
+    uint64_t cancelled() const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return cancelled_;
+    }
+    bool finished() const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return closed_ && !size_;
+    }
+
 private:
+    std::unique_lock<std::mutex> queueLock(uint64_t frame = 0) {
+        std::unique_lock<std::mutex> lock(mutex_, std::defer_lock);
+        if (trace::enabled() && !lock.try_lock()) {
+            trace::Scope wait(trace::Lock, frame, stage_);
+            lock.lock();
+        } else if (!lock.owns_lock())
+            lock.lock();
+        return lock;
+    }
+    void event(trace::Kind kind, const T& v, uint64_t reason) {
+        if (trace::enabled() && id_) trace::emit(kind, stage_, id_(v), 0, reason);
+    }
+    void pop() {
+        slots_[head_].reset();
+        head_ = (head_ + 1) % slots_.size();
+        --size_;
+    }
     mutable std::mutex mutex_;
     std::condition_variable cv_;
-    std::optional<T> value_;
-    bool closed_ = false;
-    uint64_t dropped_ = 0;
-    uint64_t cancelled_ = 0;
+    std::vector<std::optional<T>> slots_;
+    size_t head_ = 0, size_ = 0;
+    trace::Stage stage_;
+    Id id_;
+    Dispatch dispatch_;
+    bool fifo_, closed_ = false;
+    uint64_t dropped_ = 0, cancelled_ = 0, dispatch_count_ = 0;
 };
 class FrameSource {
 public:
@@ -87,15 +162,16 @@ public:
 std::unique_ptr<FrameSource> cameraSource(const std::string& device);
 std::unique_ptr<FrameSource> replaySource(const std::filesystem::path& manifest, bool paced = true);
 
-// 同一实例只由解码线程调用；MPP 预分配八个 Surface，同步确认解码后发布共享 NV12。
+// 同一实例只由解码线程调用；MPP 按配置预分配 Surface，同步确认解码后发布共享 NV12。
 // 对象析构先停止/销毁 MPP Context；仍被消费者租用的 Surface 可独立延长存活期。
 class MjpegDecoder {
 public:
-    explicit MjpegDecoder(int timeout_ms = 1000);
+    explicit MjpegDecoder(int timeout_ms = 1000, size_t pool_size = 8);
     ~MjpegDecoder();
     std::optional<DecodedFrame> decode(const EncodedFrame& packet);
     MjpegDecoder(const MjpegDecoder&) = delete;
     MjpegDecoder& operator=(const MjpegDecoder&) = delete;
+
 private:
     class Impl;
     std::unique_ptr<Impl> impl_;

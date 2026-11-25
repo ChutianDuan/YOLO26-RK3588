@@ -29,6 +29,8 @@ struct TrackerSnapshot {
     int64_t source_sequence = -1;
     double timestamp_ms = 0;
     std::vector<TimedTrackState> states;
+    uint64_t trace_frame_id = 0;
+    double trace_arrival_ms = 0;
     // Pure projection: never modifies the snapshot or authoritative tracker.
     std::vector<TrackedDetection> predictAt(double timestamp, double max_age_ms,
                                           int width, int height) const;

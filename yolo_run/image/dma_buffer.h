@@ -7,6 +7,9 @@
 #include <im2d.hpp>
 
 namespace yolo {
+// 对借用的 DMA-BUF FD 执行一次缓存同步；可重试的中断在内部处理，失败保留 errno。
+int syncDmaFd(int fd, uint64_t flags) noexcept;
+
 // 一次分配的唯一资源所有者：DMA-BUF FD、CPU 映射、RGA 导入 Handle 一起管理。
 // 析构前由上层保证设备已经结束访问；共享所有权只延长存活期，不负责等待设备。
 class DmaBuffer {

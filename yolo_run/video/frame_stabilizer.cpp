@@ -1,12 +1,13 @@
 #include "video/frame_stabilizer.h"
 #include "image/dma_buffer.h"
+#include "profiling/trace.h"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <iostream>
-#include <stdexcept>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/video/tracking.hpp>
+#include <stdexcept>
 
 namespace yolo {
 namespace {
@@ -129,7 +130,9 @@ public:
         auto dst=wrapbuffer_handle(slot.dma->handle,320,240,RK_FORMAT_YCbCr_420_SP,320,240);
         checkRga(imcheck(src,dst,{}, {},0),"stabilization gray layout");
         im_opt_t options{}; options.core=IM_SCHEDULER_RGA3_CORE0|IM_SCHEDULER_RGA3_CORE1;
+        trace::Scope rga_call(trace::Rga);
         const auto status=improcess(src,dst,{}, {},{}, {},-1,nullptr,&options,IM_SYNC);
+        rga_call.end();
         if (status!=IM_STATUS_SUCCESS && status!=IM_STATUS_NOERROR) {
             std::cerr<<"fatal: stabilization RGA completion uncertain: "<<imStrError(status)<<'\n'; std::terminate();
         }

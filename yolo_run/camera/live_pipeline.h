@@ -17,6 +17,12 @@ struct LiveOptions {
     uint16_t stream_port = 12340;
     int stream_bitrate = 2000000;
     uint64_t max_frames = 0;
+    double benchmark_seconds = 0, warmup_seconds = 0;
+    std::vector<int> masks;
+    size_t infer_depth = 1, surface_count = 8;
+    std::string queue_policy = "latest";
+    bool unpaced = false, affinity = false, ordered = false, cpu_copy = false, packet_spsc = false,
+         packet_fifo = false;
     // detect_fps=0 不主动限检测提交频率；预测超出最后匹配时间上限后隐藏轨迹。
     double detect_fps = 0, max_predict_ms = 500;
 

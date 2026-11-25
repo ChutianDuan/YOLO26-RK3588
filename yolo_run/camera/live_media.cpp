@@ -1,25 +1,27 @@
 #include "camera/live_media.h"
-#include "image/mpp_dma_buffer.h"
 #include "image/dma_buffer.h"
+#include "image/mpp_dma_buffer.h"
+#include "profiling/trace.h"
 #include <algorithm>
-#include <chrono>
 #include <cerrno>
+#include <chrono>
+#include <cmath>
 #include <cstring>
+#include <fcntl.h>
 #include <fstream>
 #include <iostream>
-#include <thread>
-#include <utility>
-#include <fcntl.h>
 #include <linux/videodev2.h>
-#include <poll.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
-#include <rk_mpi.h>
 #include <mpp_buffer.h>
 #include <mpp_frame.h>
-#include <mpp_packet.h>
 #include <mpp_meta.h>
+#include <mpp_packet.h>
 #include <opencv2/imgproc.hpp>
+#include <poll.h>
+#include <rk_mpi.h>
+#include <sys/ioctl.h>
+#include <thread>
+#include <unistd.h>
+#include <utility>
 
 namespace yolo::live {
 using Json = nlohmann::json;
@@ -70,6 +72,7 @@ Stamp parseStamp(const Json& j) {
 }
 }
 struct PacketStorage {
+    uint32_t index = 0;
     std::shared_ptr<DmaBuffer> dma;
     MppDmaBuffer buffer;
     // 末尾额外保留 256 字节并逐包清零；MppPacket 有效长度仍由 bytes 字段限定。
@@ -91,12 +94,19 @@ void EncodedFrame::withCpuRead(const std::function<void(const unsigned char*, si
 }
 PacketPool::PacketPool(size_t capacity, size_t slots) : slots_(slots) {
     if (!capacity || capacity > 64 * 1024 * 1024) throw std::runtime_error("invalid MJPEG packet capacity");
-    for (auto& slot : slots_) slot = std::make_shared<PacketStorage>(capacity);
+    for (size_t i = 0; i < slots_.size(); ++i) {
+        slots_[i] = std::make_shared<PacketStorage>(capacity);
+        slots_[i]->index = i;
+    }
 }
-std::shared_ptr<PacketStorage> PacketPool::acquire() {
+std::shared_ptr<PacketStorage> PacketPool::acquire(uint64_t frame_id) {
     // 池本身占一份引用；只有没有 EncodedFrame 消费者时才能写下一包。
     // acquire 仅由单一生产者调用，引用数检查不替代通用的多生产者锁。
-    for (const auto& slot : slots_) if (slot.use_count() == 1) return slot;
+    for (size_t i = 0; i < slots_.size(); ++i) {
+        const auto &slot = slots_[i];
+        if (slot.use_count() == 1)
+            return trace::lease(slot, trace::PacketPool, i, frame_id);
+    }
     return {};
 }
 
@@ -143,6 +153,7 @@ public:
         io(fd_, VIDIOC_REQBUFS, &req, "REQBUFS DMABUF");
         if (req.count != 4) throw std::runtime_error("camera_live requires four DMA-BUF queue slots");
         // 四个槽交给 V4L2，其余槽供出队、等待解码和 MPP 在途包轮换；没有逐帧分配。
+        trace::emit(trace::Counter, trace::PoolCapacity, 0, 0, 8, trace::PacketPool);
         pool_ = std::make_unique<PacketPool>(p.sizeimage, 8);
         size_image_ = p.sizeimage;
         for (unsigned i = 0; i < buffers_.size(); ++i) {
@@ -159,13 +170,23 @@ public:
     std::optional<EncodedFrame> next(const std::atomic<bool>& stop) override {
         unsigned timeouts = 0;
         while (!stop.load()) {
+            const auto poll_attempt = trace::emit(trace::Begin, trace::Poll);
             pollfd p{fd_, POLLIN, 0}; const int rc = poll(&p, 1, 1000);
+            const int poll_errno = errno;
+            trace::emit(trace::End, trace::Poll, 0, poll_attempt, rc > 0 ? 1 : 0);
+            errno = poll_errno;
             if (rc < 0) { if (errno == EINTR) continue; throw std::runtime_error("camera poll failed"); }
             if (!rc) { if (++timeouts == 3) throw std::runtime_error("camera three one-second timeouts"); continue; }
             if (p.revents & (POLLERR | POLLHUP | POLLNVAL)) throw std::runtime_error("camera disconnected/poll error");
             timeouts = 0;
             v4l2_buffer b{}; b.type = V4L2_BUF_TYPE_VIDEO_CAPTURE; b.memory = V4L2_MEMORY_DMABUF;
-            if (call(fd_, VIDIOC_DQBUF, &b) < 0) {
+            const auto attempt = trace::emit(trace::Begin, trace::Dqbuf);
+            const int dq = call(fd_, VIDIOC_DQBUF, &b);
+            const auto saved_errno = errno;
+            const uint64_t id = dq == 0 ? dequeued_ + 1 : 0;
+            trace::emit(trace::End, trace::Dqbuf, id, attempt, dq == 0 ? 0 : saved_errno);
+            if (dq < 0) {
+                errno = saved_errno;
                 if (errno == EAGAIN) continue;
                 throw std::runtime_error("camera DQBUF failed");
             }
@@ -182,31 +203,59 @@ public:
                 }
             } release{*this, b.index};
             ++dequeued_;
+            const double arrival = nowMs();
+            trace::emit(trace::Instant, trace::Capture, id, 0, b.sequence);
+            trace::emit(trace::Instant, trace::SourceRawSequence, id, 0, b.sequence);
+            trace::emit(trace::Instant, trace::SourceTime, id, 0,
+                        uint64_t(b.timestamp.tv_sec) * 1000000000 + b.timestamp.tv_usec * 1000);
+            trace::emit(trace::Instant, trace::SourceFlags, id, 0, b.flags);
+            trace::emit(trace::Instant, trace::CaptureSlot, id, 0, b.index);
+            trace::emit(trace::Instant, trace::PacketPool, id, 0, 0, buffers_[b.index]->index);
             if (have_sequence_) {
                 const uint32_t delta = b.sequence - last_sequence_;
-                if (delta > 1 && delta < 0x80000000U) gaps_ += delta - 1;
+                if (delta > 1 && delta < 0x80000000U) {
+                    gaps_ += delta - 1;
+                    trace::emit(trace::Instant, trace::SourceGap, id, 0, delta - 1);
+                }
                 extended_sequence_ += delta;
             } else { extended_sequence_ = b.sequence; have_sequence_ = true; }
             last_sequence_ = b.sequence;
             if ((b.flags & V4L2_BUF_FLAG_ERROR) || b.bytesused < 4 || b.bytesused > size_image_) {
-                ++corrupt_; if (++bad_run_ >= 12) throw std::runtime_error("12 consecutive corrupt MJPEG frames"); continue;
+                trace::emit(trace::Drop, trace::Rejected, id, 0, 1);
+                ++corrupt_;
+                if (++bad_run_ >= 12)
+                    throw std::runtime_error("12 consecutive corrupt MJPEG frames");
+                continue;
             }
             const bool mono = (b.flags & V4L2_BUF_FLAG_TIMESTAMP_MASK) == V4L2_BUF_FLAG_TIMESTAMP_MONOTONIC;
             const double raw = b.timestamp.tv_sec * 1000.0 + b.timestamp.tv_usec / 1000.0;
             const double timestamp = mono ? raw : nowMs();
-            if (last_ts_ && timestamp <= last_ts_) { ++timestamp_dropped_; continue; }
+            if (last_ts_ && timestamp <= last_ts_) {
+                trace::emit(trace::Drop, trace::Rejected, id, 0, 2);
+                ++timestamp_dropped_;
+                continue;
+            }
             if (!first_ts_) first_ts_ = timestamp;
             last_ts_ = timestamp;
+            trace::emit(trace::Instant, trace::Valid, id, 0, extended_sequence_);
+            trace::Scope search(trace::BufferSearch, id, trace::PacketPool);
             auto spare = pool_->acquire();
-            if (!spare) { ++pool_dropped_; continue; }
+            search.end();
+            if (!spare) {
+                trace::emit(trace::Drop, trace::Decode, id, 0, 3);
+                ++pool_dropped_;
+                continue;
+            }
             auto storage = std::exchange(buffers_[b.index], std::move(spare));
             // 压缩数据已由 V4L2 写进同一块 DMA-BUF；只保留已验证的包尾填零契约。
             CpuAccess write(storage->dma, DMA_BUF_SYNC_WRITE);
             std::memset(static_cast<unsigned char*>(storage->dma->data) + b.bytesused, 0, 256);
             write.finish();
             bad_run_ = 0;
-            return EncodedFrame{storage, b.bytesused, {extended_sequence_, timestamp, raw, b.flags,
-                mono ? "v4l2_monotonic" : "host_monotonic"}};
+            return EncodedFrame{storage,
+                                b.bytesused,
+                                {extended_sequence_, timestamp, raw, b.flags,
+                                 mono ? "v4l2_monotonic" : "host_monotonic", id, 0, arrival}};
         }
         return {};
     }
@@ -244,7 +293,8 @@ public:
         if (metadata_.value("type", "") != "mjpeg_fixture" || metadata_.at("width") != 800 || metadata_.at("height") != 600)
             throw std::runtime_error("unsupported MJPEG fixture metadata");
         pool_ = std::make_unique<PacketPool>(metadata_.value("max_packet_bytes", 800U * 600U * 2U));
-        metadata_["source"] = "paced_replay";
+        metadata_["source"] = paced_ ? "paced_replay" : "unpaced_replay";
+        trace::emit(trace::Counter, trace::PoolCapacity, 0, 0, 4, trace::PacketPool);
     }
     std::optional<EncodedFrame> next(const std::atomic<bool>& stop) override {
         std::string line;
@@ -262,7 +312,7 @@ public:
         if (paced_) while (!stop.load() && nowMs() < stamp.timestamp_ms)
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         if (stop.load()) return {};
-        auto storage = pool_->acquire();
+        auto storage = pool_->acquire(count_ + 1);
         if (!storage) throw std::runtime_error("replay packet pool exhausted");
         const std::filesystem::path filename(row.at("file").get<std::string>());
         if (filename.has_parent_path() || filename.is_absolute()) throw std::runtime_error("fixture file must be a basename");
@@ -274,6 +324,15 @@ public:
         if (!file.read(static_cast<char*>(storage->dma->data), bytes)) throw std::runtime_error("cannot read fixture JPEG");
         std::memset(static_cast<unsigned char*>(storage->dma->data) + bytes, 0, 256); write.finish();
         ++count_; bytes_ += bytes;
+        stamp.frame_id = count_;
+        stamp.arrival_ms = nowMs();
+        trace::emit(trace::Instant, trace::Capture, count_, 0, stamp.sequence);
+        if (trace::enabled()) {
+            const double raw_ns = stamp.raw_timestamp_ms * 1e6;
+            if (raw_ns >= 0 && raw_ns < std::ldexp(1.0, 64))
+                trace::emit(trace::Instant, trace::SourceTime, count_, 0, static_cast<uint64_t>(raw_ns));
+        }
+        trace::emit(trace::Instant, trace::Valid, count_, 0, stamp.sequence);
         return EncodedFrame{storage, bytes, stamp};
     }
     Json info() const override { return metadata_; }
@@ -299,18 +358,23 @@ std::unique_ptr<FrameSource> replaySource(const std::filesystem::path& manifest,
 
 class MjpegDecoder::Impl {
 public:
-    explicit Impl(int timeout) {
+    explicit Impl(int timeout, size_t pool_size) : surfaces(pool_size) {
+        trace::emit(trace::Counter, trace::PoolCapacity, 0, 0, pool_size, trace::SurfacePool);
         try {
             check(mpp_check_support_format(MPP_CTX_DEC, MPP_VIDEO_CodingMJPEG), "MPP MJPEG support");
-            // 初始化八个外部分配的 Surface；稳态只选择空闲槽，不逐帧大块分配。
-            for (auto& slot : surfaces) slot = std::make_shared<Surface>();
+            // 启动时分配整个 Surface 池。稳态只取已归还所有租约的槽。
+            for (auto& slot : surfaces)
+                slot = std::make_shared<Surface>();
             check(mpp_create(&ctx, &api), "mpp_create");
             check(mpp_init(ctx, MPP_CTX_DEC, MPP_VIDEO_CodingMJPEG), "mpp_init MJPEG");
             RK_S64 timeout_ms = timeout;
             check(api->control(ctx, MPP_SET_OUTPUT_TIMEOUT, &timeout_ms), "MPP output timeout");
             MppFrameFormat format = MPP_FMT_YUV420SP;
             check(api->control(ctx, MPP_DEC_SET_OUTPUT_FORMAT, &format), "MPP output NV12");
-        } catch (...) { if (ctx) mpp_destroy(ctx); throw; }
+        } catch (...) {
+            if (ctx) mpp_destroy(ctx);
+            throw;
+        }
     }
     ~Impl() {
         if (ctx) {
@@ -327,7 +391,15 @@ public:
         std::shared_ptr<Surface> surface;
         // 检查的是 Surface 租约，不是 dma 引用数。池独占时为 1；两路消费者
         // 任何一方仍持有 owner 都不复用，耗尽时把丢帧决策交给流水线并计数。
-        for (const auto& slot : surfaces) if (slot.use_count() == 1) { surface = slot; break; }
+        trace::Scope search(trace::BufferSearch, packet.stamp.frame_id, trace::SurfacePool);
+        for (size_t i = 0; i < surfaces.size(); ++i) {
+            const auto &slot = surfaces[i];
+            if (slot.use_count() == 1) {
+                surface = trace::lease(slot, trace::SurfacePool, i, packet.stamp.frame_id);
+                break;
+            }
+        }
+        search.end();
         if (!surface) return {};
         MppPacket input = nullptr;
         check(mpp_packet_init_with_buffer(&input, packet.storage->buffer.get()), "mpp_packet_init_with_buffer");
@@ -335,9 +407,13 @@ public:
         mpp_packet_set_length(input, packet.bytes); mpp_packet_set_pts(input, packet.stamp.sequence);
         // 把本次输出明确绑定到选中的外部 Surface；提交成功尚不能归还输入和输出。
         mpp_meta_set_frame(mpp_packet_get_meta(input), KEY_OUTPUT_FRAME, surface->frame);
+        trace::Scope submit(trace::Submit, packet.stamp.frame_id);
         check(api->decode_put_packet(ctx, input), "MPP JPEG submit");
+        submit.end();
+        trace::Scope receive(trace::GetFrame, packet.stamp.frame_id);
         MppFrame output = nullptr;
         const auto rc = api->decode_get_frame(ctx, &output);
+        receive.end();
         if (rc != MPP_OK || !output) {
             // 无法确认完成时不展开栈并回收输入/输出，避免设备仍访问已被重用的内存。
             std::cerr << "fatal: MPP JPEG completion uncertain: " << rc << '\n'; std::terminate();
@@ -362,9 +438,10 @@ public:
     }
     MppCtx ctx = nullptr;
     MppApi* api = nullptr;
-    std::array<std::shared_ptr<Surface>, 8> surfaces;
+    std::vector<std::shared_ptr<Surface>> surfaces;
 };
-MjpegDecoder::MjpegDecoder(int timeout) : impl_(std::make_unique<Impl>(timeout)) {}
+MjpegDecoder::MjpegDecoder(int timeout, size_t pool_size)
+    : impl_(std::make_unique<Impl>(timeout, pool_size)) {}
 MjpegDecoder::~MjpegDecoder() = default;
 std::optional<DecodedFrame> MjpegDecoder::decode(const EncodedFrame& p) { return impl_->decode(p); }
 
@@ -388,7 +465,9 @@ void Renderer::convertForEncode(const Nv12FrameView& f) {
     dst.color_space_mode = IM_RGB_TO_YUV_BT601_LIMIT;
     rgaCheck(imcheck(src, dst, {}, {}, 0), "encode NV12 layout");
     im_opt_t options{}; options.core = IM_SCHEDULER_RGA3_CORE0 | IM_SCHEDULER_RGA3_CORE1;
+    trace::Scope rga_call(trace::Rga);
     const auto rc = improcess(src, dst, {}, {}, {}, {}, -1, nullptr, &options, IM_SYNC);
+    rga_call.end();
     if (rc != IM_STATUS_SUCCESS && rc != IM_STATUS_NOERROR) {
         std::cerr << "fatal: encode conversion RGA completion uncertain\n"; std::terminate();
     }
@@ -407,7 +486,9 @@ cv::Mat Renderer::convert(const DecodedFrame& frame) {
     const im_rect sr{roi.x,roi.y,roi.width,roi.height}, dr{0,0,800,600};
     rgaCheck(imcheck(src, dst, sr, dr, 0), "render NV12 layout");
     im_opt_t options{}; options.core = IM_SCHEDULER_RGA3_CORE0 | IM_SCHEDULER_RGA3_CORE1;
+    trace::Scope rga_call(trace::Rga);
     const auto rc = improcess(src, dst, {}, sr, dr, {}, -1, nullptr, &options, IM_SYNC);
+    rga_call.end();
     if (rc != IM_STATUS_SUCCESS && rc != IM_STATUS_NOERROR) {
         std::cerr << "fatal: render RGA completion uncertain\n"; std::terminate();
     }
